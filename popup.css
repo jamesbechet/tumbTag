@@ -33,8 +33,15 @@ ul#menu li {
 
 ul#menu li:first-child {
 	border-right: 1px solid #fff;
+	color: #686868;
+}
+
+ul#menu li.list-loaded {
+	color: #fff;
+	cursor: pointer;
 }
 
 ul#menu li:last-child {
 	border-left: 1px solid #fff;
+	cursor: pointer;
 }
