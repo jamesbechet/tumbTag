@@ -41,10 +41,10 @@ var tumbTag = {
     this.menuElem.className         = 'hide';
     this.tagsListElem.className     = 'show';
     this.validateTagsElem.className = 'show';
-    console.log(this.tagsList);
     if (this.tagsList && this.tagsList.length) {
       this.tagsListElem.value = this.tagsList.join('\n');
       this.tagsListElem.value += '\n';
+      this.tagsListElem.scrollTop = this.tagsListElem.scrollHeight;
     }
   },
 
