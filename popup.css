@@ -5,15 +5,18 @@
 
 body, html {
 	width: 100px;
-	height: 50px;
+	height: 100px;
 	overflow: hidden;
 }
 
 div#content {
+	position: absolute;
+	top: 0;
 	width: 100%;
 	height: 100%;
 	color: #fff;
 	font-size: 18px;
+	background-color: #35465d;
 }
 
 ul#menu {
@@ -21,18 +24,18 @@ ul#menu {
 	height: 100%;
 	background-color: #35465d;
 	font-size: 40px;
+	text-align: center;
 }
 
 ul#menu li {
-	display: inline-block;
+	list-style: none;
 	height: 50px;
-	width: 38px;
-	padding-left: 11px;
+	width: 100%;
 	float: left;
 }
 
 ul#menu li:first-child {
-	border-right: 1px solid #fff;
+	border-bottom: 1px solid #fff;
 	color: #686868;
 }
 
@@ -42,6 +45,27 @@ ul#menu li.list-loaded {
 }
 
 ul#menu li:last-child {
-	border-left: 1px solid #fff;
+	border-top: 1px solid #fff;
 	cursor: pointer;
+}
+
+textarea#tags-list {
+	height: 50px;
+	width: 80px;
+	margin: 10px auto;
+}
+
+button#validate-tags {
+	border: 0;
+	background-color: #fff;
+	margin: 0 auto;
+	padding: 3px;
+}
+
+.show {
+	display: block;
+}
+
+.hide {
+	display: none;
 }
