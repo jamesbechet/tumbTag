@@ -1,3 +1,9 @@
+if (typeof(Storage)!=="undefined") {
+  this.canStoreList = true;
+} else {
+  this.canStoreList = false;
+}
+
 var tumbTag = {
   tagsList: null,
   menuElem: document.getElementById('menu'),
@@ -10,27 +16,48 @@ var tumbTag = {
   init: function () {
     this.tagsList = this.retrieveList();
     if (this.tagsList && this.tagsList.length) {
-      this.tagElem.className += 'list-loaded';
+      this.tagElem.className = 'list-loaded';
     }
     this.bindEvents();
   },
 
   // Bind all the events
   bindEvents: function () {
-    this.tagElem.onclick  = this.addTags.bind(this);
-    this.listElem.onclick = this.createList.bind(this);
+    this.tagElem.onclick          = this.addTags.bind(this);
+    this.listElem.onclick         = this.createList.bind(this);
+    this.validateTagsElem.onclick = this.saveList.bind(this);
   },
 
   // Retrieve the tags' list in the local storage
   retrieveList: function () {
-    return [];
+    if (window.canStoreList && window.localStorage) {
+      this.tagsList = window.localStorage.tagsList.split(',');
+    }
+    return this.tagsList;
   },
 
   // Create the tags' list
   createList: function () {
-    this.menuElem.className             = 'hide';
+    this.menuElem.className         = 'hide';
     this.tagsListElem.className     = 'show';
     this.validateTagsElem.className = 'show';
+    console.log(this.tagsList);
+    if (this.tagsList && this.tagsList.length) {
+      this.tagsListElem.value = this.tagsList.join('\n');
+      this.tagsListElem.value += '\n';
+    }
+  },
+
+  // Save the tags' list
+  saveList: function (argument) {
+    this.tagsList                   = this.tagsListElem.value.replace(/\r\n/g, "\n").split("\n");
+    window.localStorage.tagsList    = this.tagsList;
+    this.tagsListElem.className     = 'hide';
+    this.validateTagsElem.className = 'hide';
+    this.menuElem.className         = 'show';
+    if (this.tagsList && this.tagsList.length) {
+      this.tagElem.className = 'list-loaded';
+    }
   },
 
   // Add the tags in the tumblr's input

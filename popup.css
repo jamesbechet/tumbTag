@@ -37,6 +37,7 @@ ul#menu li {
 ul#menu li:first-child {
 	border-bottom: 1px solid #fff;
 	color: #686868;
+	cursor: default;
 }
 
 ul#menu li.list-loaded {
