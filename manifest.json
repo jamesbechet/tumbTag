@@ -18,7 +18,7 @@
   "content_scripts": [
     {
       "matches": [ "http://www.tumblr.com/*", "https://www.tumblr.com/*" ],
-      "js": ["content.js"]
+      "js": ["jquery-1.9.0.js", "content.js"]
     }
   ]
 }
