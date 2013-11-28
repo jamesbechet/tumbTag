@@ -62,8 +62,13 @@ var tumbTag = {
 
   // Add the tags in the tumblr's input
   addTags: function () {
+    var inputTagsElem = document.getElementsByClassName('editor_wrapper');
+
     if (this.tagsList && this.tagsList.length) {
-      // Can add the tags
+      chrome.extension.sendMessage({
+        type: "add-tags",
+        tagsList: this.tagsList
+      });
     } else {
       // Display buble saying to add a list
     }
@@ -74,3 +79,4 @@ var tumbTag = {
 document.addEventListener('DOMContentLoaded', function () {
   tumbTag.init();
 });
+
