@@ -51,12 +51,14 @@ ul#menu li:last-child {
 }
 
 textarea#tags-list {
+	display: block;
 	height: 50px;
 	width: 80px;
 	margin: 10px auto;
 }
 
 button#validate-tags {
+	display: block;
 	border: 0;
 	background-color: #fff;
 	margin: 0 auto;

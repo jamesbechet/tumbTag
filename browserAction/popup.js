@@ -6,64 +6,69 @@ if (typeof(Storage)!=="undefined") {
 
 var tumbTag = {
   tagsList: null,
-  menuElem: document.getElementById('menu'),
-  tagElem: document.getElementById('add-tags'),
-  listElem: document.getElementById('add-list'),
-  tagsListElem: document.getElementById('tags-list'),
-  validateTagsElem: document.getElementById('validate-tags'),
+  $menuElem: $('#menu'),
+  $tagElem: $('#add-tags'),
+  $listElem: $('#add-list'),
+  $tagsListElem: $('#tags-list'),
+  $validateTagsElem: $('#validate-tags'),
 
   // Init the object
   init: function () {
     this.tagsList = this.retrieveList();
     if (this.tagsList && this.tagsList.length) {
-      this.tagElem.className = 'list-loaded';
+      this.$tagElem.addClass('list-loaded');
     }
     this.bindEvents();
   },
 
   // Bind all the events
   bindEvents: function () {
-    this.tagElem.onclick          = this.addTags.bind(this);
-    this.listElem.onclick         = this.createList.bind(this);
-    this.validateTagsElem.onclick = this.saveList.bind(this);
+    this.$tagElem.on('click', this.addTags.bind(this));
+    this.$listElem.on('click', this.createList.bind(this));
+    this.$validateTagsElem.on('click', this.saveList.bind(this));
   },
 
   // Retrieve the tags' list in the local storage
   retrieveList: function () {
     if (window.canStoreList && window.localStorage) {
       this.tagsList = window.localStorage.tagsList.split(',');
+      if (this.tagsList && !this.tagsList[0]) {
+        this.tagsList = null;
+      }
     }
     return this.tagsList;
   },
 
   // Create the tags' list
   createList: function () {
-    this.menuElem.className         = 'hide';
-    this.tagsListElem.className     = 'show';
-    this.validateTagsElem.className = 'show';
+    this.$menuElem.hide();
+    this.$tagsListElem.show();
+    this.$validateTagsElem.show();
     if (this.tagsList && this.tagsList.length) {
-      this.tagsListElem.value = this.tagsList.join('\n');
-      this.tagsListElem.value += '\n';
-      this.tagsListElem.scrollTop = this.tagsListElem.scrollHeight;
+      this.$tagsListElem.val(this.tagsList.join('\n') + '\n');
+      this.$tagsListElem.scrollTop(this.$tagsListElem[0].scrollHeight);
     }
   },
 
   // Save the tags' list
   saveList: function (argument) {
-    this.tagsList                   = this.tagsListElem.value.replace(/\r\n/g, "\n").split("\n");
-    this.tagsList                   = this.tagsList.filter(function (tag) {return tag !== '';});
-    window.localStorage.tagsList    = this.tagsList;
-    this.tagsListElem.className     = 'hide';
-    this.validateTagsElem.className = 'hide';
-    this.menuElem.className         = 'show';
+    this.tagsList                 = this.$tagsListElem.val().replace(/\r\n/g, "\n").split("\n");
+    this.tagsList                 = this.tagsList.filter(function (tag) {return tag !== '';});
+    window.localStorage.tagsList  = this.tagsList;
+
+    this.$tagsListElem.hide();
+    this.$validateTagsElem.hide();
+    this.$menuElem.show();
     if (this.tagsList && this.tagsList.length) {
-      this.tagElem.className = 'list-loaded';
+      this.$tagElem.addClass('list-loaded');
+    } else {
+      this.$tagElem.removeClass('list-loaded');
     }
   },
 
   // Add the tags in the tumblr's input
   addTags: function () {
-    var inputTagsElem = document.getElementsByClassName('editor_wrapper');
+    var $inputTagsElem = $('input.editor_wrapper');
 
     if (this.tagsList && this.tagsList.length) {
       chrome.extension.sendMessage({
