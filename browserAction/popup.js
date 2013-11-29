@@ -1,9 +1,10 @@
-if (typeof(Storage)!=="undefined") {
+if (typeof(Storage) !== "undefined") {
   this.canStoreList = true;
 } else {
   this.canStoreList = false;
 }
 
+// There you go
 var tumbTag = {
   tagsList: null,
   $menuElem: $('#menu'),
@@ -11,6 +12,7 @@ var tumbTag = {
   $listElem: $('#add-list'),
   $tagsListElem: $('#tags-list'),
   $validateTagsElem: $('#validate-tags'),
+  $errors: $('p#errors'),
 
   // Init the object
   init: function () {
@@ -66,17 +68,40 @@ var tumbTag = {
     }
   },
 
+  // Display errors
+  showError: function (err) {
+    var that = this;
+
+    if (this.$errors.css('display') === 'none') { // TODO Magic bug
+      this.$errors.text(err);
+      this.$errors.show();
+      this.$errors.css('opacity', '1');
+      setTimeout(function () {
+        that.$errors.text = '';
+        that.$errors.css('opacity', '0');
+        setTimeout(function (argument) { // Wat
+          that.$errors.hide();
+        }, 1000)
+      }, 4000)
+    }
+  },
+
   // Add the tags in the tumblr's input
   addTags: function () {
-    var $inputTagsElem = $('input.editor_wrapper');
+    var that = this,
+        $inputTagsElem = $('input.editor_wrapper');
 
     if (this.tagsList && this.tagsList.length) {
       chrome.extension.sendMessage({
         type: "add-tags",
         tagsList: this.tagsList
+      }, function (res) {
+        console.log('there', res);
+        res && that.showError(res.msg);
       });
     } else {
       // Display buble saying to add a list
+      this.showError('You have to create your list of tags first');
     }
   }
 }

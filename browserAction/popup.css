@@ -37,7 +37,7 @@ ul#menu li {
 ul#menu li:first-child {
 	border-bottom: 1px solid #fff;
 	color: #686868;
-	cursor: default;
+	cursor: pointer;
 }
 
 ul#menu li.list-loaded {
@@ -65,10 +65,19 @@ button#validate-tags {
 	padding: 3px;
 }
 
-.show {
-	display: block;
-}
-
-.hide {
-	display: none;
+p#errors {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	margin: 30% auto;
+	font-size: 14px;
+	padding: 2px 4px;
+	text-align: center;
+	background-color: rgba(255, 0, 0, .5);
+	opacity: 0;
+	 -webkit-transition: opacity 1s ease-in-out;
+  -moz-transition: opacity 1s ease-in-out;
+  -ms-transition: opacity 1s ease-in-out;
+  -o-transition: opacity 1s ease-in-out;
+  transition: opacity 1s ease-in-out;
 }
