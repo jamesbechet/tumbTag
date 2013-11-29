@@ -51,6 +51,7 @@ var tumbTag = {
   // Save the tags' list
   saveList: function (argument) {
     this.tagsList                   = this.tagsListElem.value.replace(/\r\n/g, "\n").split("\n");
+    this.tagsList                   = this.tagsList.filter(function (tag) {return tag !== '';});
     window.localStorage.tagsList    = this.tagsList;
     this.tagsListElem.className     = 'hide';
     this.validateTagsElem.className = 'hide';
