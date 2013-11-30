@@ -68,16 +68,10 @@ button#validate-tags {
 p#errors {
 	position: absolute;
 	top: 0;
-	width: 100%;
-	margin: 30% auto;
+	width: 80%;
+	margin: 15% 7%;
 	font-size: 14px;
 	padding: 2px 4px;
 	text-align: center;
-	background-color: rgba(255, 0, 0, .5);
-	opacity: 0;
-	 -webkit-transition: opacity 1s ease-in-out;
-  -moz-transition: opacity 1s ease-in-out;
-  -ms-transition: opacity 1s ease-in-out;
-  -o-transition: opacity 1s ease-in-out;
-  transition: opacity 1s ease-in-out;
+	background-color: rgba(0, 0, 0, .5);
 }

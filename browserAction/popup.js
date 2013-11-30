@@ -72,11 +72,13 @@ var tumbTag = {
   showError: function (err) {
     var that = this;
 
-    if (this.$errors.css('opacity') === '0') {
+    if (this.$errors.css('display') === 'none') {
       this.$errors.text(err);
-      this.$errors.css('opacity', '1');
+      this.$errors.show(1000);
       setTimeout(function () {
-        that.$errors.css('opacity', '0');
+        setTimeout(function (argument) { // Wat
+          that.$errors.hide(1000);
+        }, 1000)
       }, 4000)
     }
   },
