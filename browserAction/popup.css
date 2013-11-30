@@ -17,6 +17,7 @@ div#content {
 	color: #fff;
 	font-size: 18px;
 	background-color: #35465d;
+	z-index: 1;
 }
 
 ul#menu {
@@ -25,6 +26,7 @@ ul#menu {
 	background-color: #35465d;
 	font-size: 40px;
 	text-align: center;
+	z-index: 1;
 }
 
 ul#menu li {
@@ -74,6 +76,7 @@ p#errors {
 	padding: 2px 4px;
 	text-align: center;
 	background-color: rgba(246, 117, 98, .7);
+	z-index: 2;
 }
 
 ::-webkit-scrollbar {

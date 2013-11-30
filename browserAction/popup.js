@@ -50,6 +50,10 @@ var tumbTag = {
       this.$tagsListElem.val(this.tagsList.join('\n') + '\n');
       this.$tagsListElem.scrollTop(this.$tagsListElem[0].scrollHeight);
     }
+    if (this.$errors.css('display') !== 'none') {
+      clearTimeout(this.hideTimeout);
+      this.$errors.hide();
+    }
   },
 
   // Save the tags' list
@@ -75,10 +79,8 @@ var tumbTag = {
     if (this.$errors.css('display') === 'none') {
       this.$errors.text(err);
       this.$errors.show(1000);
-      setTimeout(function () {
-        setTimeout(function (argument) { // Wat
-          that.$errors.hide(1000);
-        }, 1000)
+      this.hideTimeout = setTimeout(function () {
+        that.$errors.hide(1000);
       }, 4000)
     }
   },
