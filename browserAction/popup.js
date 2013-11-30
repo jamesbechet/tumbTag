@@ -72,16 +72,11 @@ var tumbTag = {
   showError: function (err) {
     var that = this;
 
-    if (this.$errors.css('display') === 'none') { // TODO Magic bug
+    if (this.$errors.css('opacity') === '0') {
       this.$errors.text(err);
-      this.$errors.show();
       this.$errors.css('opacity', '1');
       setTimeout(function () {
-        that.$errors.text = '';
         that.$errors.css('opacity', '0');
-        setTimeout(function (argument) { // Wat
-          that.$errors.hide();
-        }, 1000)
       }, 4000)
     }
   },
@@ -96,7 +91,6 @@ var tumbTag = {
         type: "add-tags",
         tagsList: this.tagsList
       }, function (res) {
-        console.log('there', res);
         res && that.showError(res.msg);
       });
     } else {
