@@ -73,5 +73,14 @@ p#errors {
 	font-size: 14px;
 	padding: 2px 4px;
 	text-align: center;
-	background-color: rgba(0, 0, 0, .5);
+	background-color: rgba(246, 117, 98, .7);
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 0;
+    background-color: #f67562;    
 }
