@@ -5,12 +5,12 @@
 
 ## Features:
 
-- Create a list of tag that is saved in the browser (localStorage)
+- Create a list of tags that is saved in the browser (localStorage)
 - Add the tags on your post in one click
 
 ## How it works ?
 
-When I want to post anything on tumblr, I had to go through all my tags (\#hashtags). Not even a copy-paste worked, so I created TumbTag. This chrome extensions allows you to store your favorite tags and add them to your post in one click.
+When I wanted to post anything on tumblr, I had to go through all my tags (\#hashtags). Not even a copy-paste worked, so I created TumbTag. This chrome extensions allows you to store your favorite tags and add them to your post in one click.
 
 ## MIT License (MIT)
 
