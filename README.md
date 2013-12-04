@@ -1,4 +1,4 @@
-# TumbTag - Tumblr easy add tags chrome extension (currently being reviewed by the chrome)
+# TumbTag - Tumblr easy add tags [Chrome Extension](https://chrome.google.com/webstore/detail/tumbtag-tumblr-easy-add-t/cmbakfeanhaniakabiiabhdjkhgbbdmp?utm_source=chrome-ntp-icon)
 =======
 
 #### Allows you to add your list of your favorite tags in one click.
