@@ -32,7 +32,7 @@ var tumbTag = {
 
   // Retrieve the tags' list in the local storage
   retrieveList: function () {
-    if (window.canStoreList && window.localStorage) {
+    if (window.canStoreList && window.localStorage && window.localStorage.tagsList) {
       this.tagsList = window.localStorage.tagsList.split(',');
       if (this.tagsList && !this.tagsList[0]) {
         this.tagsList = null;
