@@ -49,6 +49,8 @@ var tumbTag = {
     if (this.tagsList && this.tagsList.length) {
       this.$tagsListElem.val(this.tagsList.join('\n') + '\n');
       this.$tagsListElem.scrollTop(this.$tagsListElem[0].scrollHeight);
+    } else {
+      this.$tagsListElem.val('tag1\ntag2\ntag3');
     }
     if (this.$errors.css('display') !== 'none') {
       clearTimeout(this.hideTimeout);

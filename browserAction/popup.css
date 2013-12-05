@@ -4,8 +4,8 @@
 }
 
 body, html {
-	width: 100px;
-	height: 100px;
+	width: 200px;
+	height: 200px;
 	overflow: hidden;
 	font-family: 'Helvetica', "Times New Roman", Georgia, Serif;
 }
@@ -32,9 +32,10 @@ ul#menu {
 
 ul#menu li {
 	list-style: none;
-	height: 50px;
+	height: 100px;
 	width: 100%;
 	float: left;
+	line-height: 100px;
 }
 
 ul#menu li:first-child {
@@ -55,8 +56,8 @@ ul#menu li:last-child {
 
 textarea#tags-list {
 	display: block;
-	height: 50px;
-	width: 80px;
+	height: 150px;
+	width: 150px;
 	margin: 10px auto;
 }
 
@@ -72,9 +73,9 @@ p#errors {
 	position: absolute;
 	top: 0;
 	width: 80%;
-	margin: 15% 7%;
+	margin: 40% 7%;
 	font-size: 14px;
-	padding: 2px 4px;
+	padding: 4px 8px;
 	text-align: center;
 	background-color: rgba(246, 117, 98, .7);
 	z-index: 2;
