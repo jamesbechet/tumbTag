@@ -35,7 +35,6 @@ ul#menu li {
 	height: 100px;
 	width: 100%;
 	float: left;
-	line-height: 100px;
 }
 
 ul#menu li:first-child {
@@ -52,6 +51,16 @@ ul#menu li.list-loaded {
 ul#menu li:last-child {
 	border-top: 1px solid #fff;
 	cursor: pointer;
+}
+
+ul#menu span.icon {
+	display: block;
+	margin-top: 10px;
+}
+
+ul#menu span.label {
+	font-size: 18px;
+	display: block;
 }
 
 textarea#tags-list {
