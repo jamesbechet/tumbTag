@@ -3,18 +3,8 @@
 
   "name": "Tumblr Post Tags",
   "description": "Post your list of favorite tags in one click.",
-  "version": "1.1.3",
+  "version": "2.0.0",
   "icons": { "16": "icons/16x16.png", "48": "icons/48x48.png", "128": "icons/128x128.png" },
-  
-  "background": {
-    "scripts": ["background.js"],
-    "persistent": false
-  },
-
-  "browser_action": {
-    "default_icon": "icons/icon.png",
-    "default_popup": "browserAction/popup.html"
-  },
 
   "content_scripts": [
     {
