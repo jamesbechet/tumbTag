@@ -7,13 +7,10 @@ if (typeof(Storage) !== "undefined") {
 $('document').ready(function() {
   var tumbTag = {
     $newPost: $('.new_post_label'),
-    tagElement: '<div href="#" class="split" id="add_tags" style="margin-left:10px;"> <button class="chrome blue txt post_tagss">Tags</button><div class="chrome blue options"> </div></div>',
-    // Static options menu
-    optionsElement: '<div id="post_tag_options" style="position:absolute;top:5px;right:28px" class=""><div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px;"><div class="popover_inner"><ul><li class="create_list"><div class="option">Create List</div></li><li class="choose_list"><div class="option">Choose List</div></li><li class="modify_list"><div class="option">Modify List</div></li></ul></div></div></div>',
     tagsSelected: {},
     tags: [],
     $tags: [],
-    $options: [],
+    $optionsList: [],
     $createList: [],
     $modifyList: [],
     $chooseList: [],
@@ -23,59 +20,57 @@ $('document').ready(function() {
     selectorsHideable: ['post_tag_options', 'create_list_view', 'modify_list_view', 'choose_list_view'],
 
     init: function() {
-      var that = this;
-
       if (window.canStoreList) {
         if (!window.localStorage.tags) {
           // Add example tags list
           window.localStorage.tags = JSON.stringify([{
             name: 'Example',
-            list: ['tag1', 'tag2', 'tag3', 'tag5'],
+            list: ['tag1', 'tag2', 'tag3'],
             selected: true
           }]);
         }
         this.tags = JSON.parse(window.localStorage.tags);
-        for (var i = 0; i < this.tags.length; i += 1) {
-          if (this.tags[i].selected === true) {
-            this.tagsSelected = this.tags[i];
-            break;
-          }
-        }
-        this.$newPost.click(that.addTagsButton.bind(this));
-        that.addTagsButton();
+        this.getSelectedTagList();
+        this.$newPost.click(this.createElems.bind(this));
+        this.createElems();
       }
     },
 
-    addTagsButton: function() {
+  getSelectedTagList: function() {
+      for (var i = 0; i < this.tags.length; i += 1) {
+        if (this.tags[i].selected === true) {
+          this.tagsSelected = this.tags[i];
+          break;
+        }
+      }
+    },
+
+    createElems: function() {
       var that = this;
 
       setTimeout(function() {
         if ($('#create_post').length) {
-          that.createElems();
+          $('#create_post').after(that.getTagBtnHtml());
+          that.$tags = $('#add_tags');
+          // Options
+          that.$tags.find('.options').after(that.getOptionsMenuHtml());
+          that.$optionsList = $('#post_tag_options').find('.post_options');
+          // Options actions
+          that.$createListBtn = that.$optionsList.find('.create_list');
+          that.$modifyListBtn = that.$optionsList.find('.modify_list');
+          that.$chooseListBtn = that.$optionsList.find('.choose_list');
+          that.buildViews();
           that.bindElements();
         }
-      });
-    },
-
-    createElems: function() {
-      $('#create_post').after(this.tagElement);
-      this.$tags = $('#add_tags');
-      // Options
-      this.$tags.find('.options').after(this.optionsElement);
-      this.$options = $('#post_tag_options').find('.post_options');
-      // Options actions
-      this.$createListBtn = this.$options.find('.create_list');
-      this.$modifyListBtn = this.$options.find('.modify_list');
-      this.$chooseListBtn = this.$options.find('.choose_list');
-      this.buildViews();
+      }, 0);
     },
 
     bindElements: function() {
       var that = this;
 
-      // Fill with tags
+      // Final action: Add tags to the post
       this.$tags.find('.post_tagss').first().click(function(e) {
-        var nbTags = that.tagsSelected.list.length,
+        var nbTags        = (!jQuery.isEmptyObject(that.tagsSelected) && that.tagsSelected.list.length) || 0,
             $tagInput     = $('input.editor'),
             $prevTagInput = $('div.editor_wrapper'),
             $postContent  = $('div#post_content');
@@ -94,23 +89,25 @@ $('document').ready(function() {
       // Show options
       this.$tags.find('.options').click(this.showOptions.bind(this));
 
-      // Hide the options if it's showed
+      // Hide the options when the user click in the page (tumblr behavior)
       $('body').click(function() {
         that.hideAllExceptMe();
       });
 
-      // Avoid to trigger the event above
+      // Avoid to hide the options (body click event)
       $('#post_tag_options .post_options').click(function() {
         return false;
       });
 
+      // Bind the actions available on the options
       this.$createListBtn.click(this.createList.bind(this));
       this.$modifyListBtn.click(this.modifyList.bind(this));
       this.$chooseListBtn.click(this.chooseList.bind(this));
     },
 
-    getOptionHtml: function(optionName, selected) {
-      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '">' + optionName + '</div></li>';
+    // HTML strings
+    getOptionHtml: function(optionName, selected, isDeletable) {
+      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '">' + optionName + (isDeletable ? '<i class="delete" href="#" style="float:right; color:#f00; font-size: 16px; font-style: none;">X</i>' : '') + '</div></li>';
     },
 
     getTextAreaHtml: function(optionName, tagsObj) {
@@ -122,8 +119,25 @@ $('document').ready(function() {
     },
 
     getOptionsHtml: function(optionsId) {
-      return '<div id="' + optionsId + '" style="position:absolute;top:5px;right:28px" class=""><div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px;"><div class="popover_inner"><ul></ul></div></div></div>';
+      return '<div id="' + optionsId + '" style="position:absolute;top:5px;right:28px" class="">' + 
+             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px;">' + 
+             '<div class="popover_inner"><ul></ul></div></div></div>';
     },
+
+    getTagBtnHtml: function() {
+      return '<div href="#" class="split" id="add_tags" style="margin-left:10px;">' + 
+             '<button class="chrome blue txt post_tagss">Tags</button><div class="chrome blue options"></div></div>';
+    },
+
+    getOptionsMenuHtml: function() {
+      return '<div id="post_tag_options" style="position:absolute;top:5px;right:28px" class="">' + 
+             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px;">' + 
+             '<div class="popover_inner"><ul><li class="create_list"><div class="option">Create List</div></li><li class="choose_list"><div class="option">Choose List</div>' + 
+             '</li><li class="modify_list"><div class="option">Modify List</div></li></ul></div></div></div>';
+    },
+
+
+    // Utils //
 
     addOption: function($selector, optionHtml) {
       if ($selector.prop('tagName') === 'UL') {
@@ -133,19 +147,7 @@ $('document').ready(function() {
       }
     },
 
-    showOptions: function() {
-      this.$options.show();
-      this.hideAllExceptMe(this.$options)
-      return false;
-    }, 
-
-    createList: function() {
-      this.createListView();
-      this.hideAllExceptMe(this.$createList);
-      this.$createList.show();
-      return false;
-    },
-    
+    // Handle the case of same List's name
     checkListName: function(name) {
       for (var i = 0; i < this.tags.length; i += 1) {
         if (name === this.tags[i].name) {
@@ -160,6 +162,22 @@ $('document').ready(function() {
         this.tags[i].selected = false;
       }
       window.localStorage.tags = JSON.stringify(this.tags);
+    },
+
+
+    // Views //
+
+    showOptions: function() {
+      this.$optionsList.show();
+      this.hideAllExceptMe(this.$optionsList)
+      return false;
+    }, 
+
+    createList: function() {
+      this.buildCreateView();
+      this.hideAllExceptMe(this.$createList);
+      this.$createList.show();
+      return false;
     },
 
     _createList: function(modify, e) {
@@ -185,8 +203,8 @@ $('document').ready(function() {
       }
       window.localStorage.tags = JSON.stringify(this.tags);
       this.$createList.hide();
-      this.chooseListView();
-      this.modifyListView();
+      this.buildChooseView();
+      this.buildModifyView();
       return false;
     },
 
@@ -216,18 +234,18 @@ $('document').ready(function() {
     _chooseList: function(e) {
       this.clearListOfSelected();
       this.setTagsSelected(e.currentTarget);
-      this.chooseListView();
-      this.modifyListView();
+      this.buildChooseView();
+      this.buildModifyView();
     },
 
     buildViews: function() {
-      this.createListView();
-      this.modifyListView();
-      this.chooseListView();
+      this.buildCreateView();
+      this.buildModifyView();
+      this.buildChooseView();
     },
 
     // Building Create List View
-    createListView: function(tagsObj) {
+    buildCreateView: function(tagsObj) {
       if (this.$createList.length) {
         this.$createList.parent().remove();
       }
@@ -242,7 +260,7 @@ $('document').ready(function() {
     },
 
     // Building Modify List View
-    modifyListView: function() {
+    buildModifyView: function() {
       var that = this;
 
       if (this.$modifyList.length) {
@@ -252,13 +270,42 @@ $('document').ready(function() {
       this.$modifyList = $('#modify_list_view').find('.post_options');
       if (this.tags) {
         this.tags.forEach(function(tagObj) {
-          that.addOption(that.$modifyList.find('ul'), that.getOptionHtml(tagObj.name, tagObj.selected));
+          that.addOption(that.$modifyList.find('ul'), that.getOptionHtml(tagObj.name, tagObj.selected, true));
         });
         this.$modifyList.find('li').click(this._modifyList.bind(this));
+        this.$modifyList.find('.delete').click(this._deleteList.bind(this));
       }
       $('#modify_list_view .post_options').click(function() {
         return false;
       })
+    },
+
+    _deleteList: function(e) {
+      var that = this,
+          name = $(e.currentTarget).parent().parent().attr('class'),
+          wasSelected = false;
+
+      for (var i = 0; i < this.tags.length; i += 1) {
+        if (this.tags[i].name === name) {
+          wasSelected = this.tags[i].selected;
+          this.tags.splice(i, 1);
+          break ;
+        }
+      }
+
+      // When we delete a list, change the selected list
+      if (wasSelected && this.tags.length) {
+        this.tagsSelected = this.tags[this.tags.length - 1];
+        this.tagsSelected.selected = true;
+      } else if (wasSelected) {
+        this.tagsSelected = {};
+      }
+      window.localStorage.tags = JSON.stringify(this.tags);
+      this.buildModifyView();
+      this.buildChooseView();
+      setTimeout(function() {
+        that.$modifyList.show();
+      }, 0);
     },
 
     _modifyList: function(e) {
@@ -269,13 +316,13 @@ $('document').ready(function() {
       }
       this.hideAllExceptMe();
       // We can use the Create View which more or less the same
-      this.createListView(i < this.tags.length ? this.tags[i]: this.tags[0]);
+      this.buildCreateView(i < this.tags.length ? this.tags[i]: this.tags[0]);
       this.$createList.show();
       return false;
     },
 
     // Building Choose List View
-    chooseListView: function() {
+    buildChooseView: function() {
       if (this.$chooseList.length) {
         this.$chooseList.parent().remove();
       }
@@ -306,35 +353,3 @@ $('document').ready(function() {
   };
   tumbTag.init();  
 });
-
-// chrome.extension.onMessage.addListener(function(msg, sender, sendResponse) {
-// switch (msg.type) {
-//   case "add-tags":
-//     var $tagInput     = $('input.editor'),
-//         $prevTagInput = $('div.editor_wrapper'),
-//         $postContent  = $('div#post_content'),
-//         tagsNb        = msg.tagsList && msg.tagsList.length;
-
-//     if ($postContent && !($postContent.length)) {
-//       sendResponse({
-//         type: "error",
-//         msg: 'You have to fill a post first'
-//       });
-//     } else if (tagsNb && $tagInput.length) {
-//       for (var i = 0; i < tagsNb; i += 1) {
-//         if (i === (tagsNb - 1)) { // Last value, different behavior
-//           $tagInput.val(msg.tagsList[i]);
-//           $postContent.trigger('click'); // Add the last element, avoid one more click
-//         } else { // Add span
-//           $prevTagInput.before('<span class="tag">' + msg.tagsList[i] + '</span>');
-//         }
-//       }
-//     } else {
-//       sendResponse({
-//         type: "error",
-//         msg: 'Oops, an unknown error occured. Sorry.'
-//       });
-//     }
-//     break;
-// }
-// });

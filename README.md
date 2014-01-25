@@ -5,8 +5,9 @@
 
 ## Features:
 
-- Create a list of tags saved in the browser (localStorage)
+- Create lists of tags saved in the browser (localStorage)
 - Post the tags on your post in one click
+- Tags button fits with tumblr layouts and design
 
 ## How it works ?
 
