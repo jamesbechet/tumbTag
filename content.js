@@ -68,8 +68,9 @@ $('document').ready(function() {
     bindElements: function() {
       var that = this;
 
-      // Final action: Add tags to the post
+      // Final action: Post tags
       this.$tags.find('.post_tagss').first().click(function(e) {
+        that.hideAllExceptMe();
         var nbTags        = (!jQuery.isEmptyObject(that.tagsSelected) && that.tagsSelected.list.length) || 0,
             $tagInput     = $('input.editor'),
             $prevTagInput = $('div.editor_wrapper'),
@@ -188,15 +189,9 @@ $('document').ready(function() {
       this.clearListOfSelected();        
 
       if (modify === true) {
-        for (var i = 0; i < this.tags.length; i += 1) {
-          if (this.tags[i].name === $(e.currentTarget).parent().siblings('.create_list_view').children('input').val()) {
-            this.tags[i].name = listName;
-            this.tags[i].list = tags;
-            this.tags[i].selected = true;
-            this.tagsSelected = this.tags[i];
-            break ;
-          }
-        }
+        this.tagsSelected.name = listName;
+        this.tagsSelected.list = tags;
+        this.tagsSelected.selected = true;
       } else {
         this.tags.push({ name: listName, list: tags, selected: true });
         this.tagsSelected = this.tags[this.tags.length - 1];
@@ -316,6 +311,8 @@ $('document').ready(function() {
       }
       this.hideAllExceptMe();
       // We can use the Create View which more or less the same
+      this.clearListOfSelected();
+      this.tagsSelected = i < this.tags.length ? this.tags[i]: this.tags[0];
       this.buildCreateView(i < this.tags.length ? this.tags[i]: this.tags[0]);
       this.$createList.show();
       return false;
