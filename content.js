@@ -182,8 +182,14 @@ $('document').ready(function() {
     },
 
     _createList: function(modify, e) {
-      var listName = this.checkListName(this.$createList.find('input').val()),
-          tags     = this.$createList.find('textarea').val().replace(/\r\n/g, "\n").split("\n");
+      var tags     = this.$createList.find('textarea').val().replace(/\r\n/g, "\n").split("\n"),
+          listName;
+
+      if (modify !== true || (modify && this.$createList.find('input').val() !== this.tagsSelected.name)) {
+        listName = this.checkListName(this.$createList.find('input').val());
+      } else if (modify === true) {
+        listName = this.$createList.find('input').val();
+      }
 
       tags = tags.filter(function (tag) { return tag !== ''; });
       this.clearListOfSelected();        
