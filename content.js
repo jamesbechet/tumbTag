@@ -6,7 +6,7 @@ if (typeof(Storage) !== "undefined") {
 
 $('document').ready(function() {
   var tumbTag = {
-    $newPost: $('.new_post_label'),
+    $newPost: $('.new_post_label, .reblog'),
     tagsSelected: {},
     tags: [],
     $tags: [],
@@ -45,11 +45,14 @@ $('document').ready(function() {
       }
     },
 
-    createElems: function() {
+    createElems: function(e, i) {
       var that = this;
 
+      if (typeof e === 'number') {
+        i = e;
+      }
       setTimeout(function() {
-        if ($('#create_post').length) {
+        if ($('#create_post').length && !$('#add_tags').length) {
           $('#create_post').after(that.getTagBtnHtml());
           that.$tags = $('#add_tags');
           // Options
@@ -61,6 +64,10 @@ $('document').ready(function() {
           that.$chooseListBtn = that.$optionsList.find('.choose_list');
           that.buildViews();
           that.bindElements();
+        } else if (i && i < 5 || !i) {
+          setTimeout(function() {
+            that.createElems((i || 0) + 1);
+          }, 500);
         }
       }, 0);
     },
@@ -121,7 +128,7 @@ $('document').ready(function() {
 
     getOptionsHtml: function(optionsId) {
       return '<div id="' + optionsId + '" style="position:absolute;top:5px;right:28px" class="">' + 
-             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px;">' + 
+             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px; max-height: 352px; overflow-y: scroll;">' + 
              '<div class="popover_inner"><ul></ul></div></div></div>';
     },
 
