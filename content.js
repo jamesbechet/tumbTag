@@ -20,6 +20,8 @@ $('document').ready(function() {
     selectorsHideable: ['post_tag_options', 'create_list_view', 'modify_list_view', 'choose_list_view'],
 
     init: function() {
+      var that = this;
+
       if (window.canStoreList) {
         if (!window.localStorage.tags) {
           // Add example tags list
@@ -31,7 +33,10 @@ $('document').ready(function() {
         }
         this.tags = JSON.parse(window.localStorage.tags);
         this.getSelectedTagList();
-        this.$newPost.click(this.createElems.bind(this));
+        setInterval(function() {
+          that.$newPost = $('.new_post_label, .reblog');
+          that.$newPost.click(that.createElems.bind(that));
+        }, 2000);
         this.createElems();
       }
     },
