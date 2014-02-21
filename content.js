@@ -68,8 +68,8 @@ $('document').ready(function() {
         });
       } else {
         that.tags = tags.tags;
+        that.getSelectedTagList();
       }
-        that.tagsSelected = that.tags[0];
         that.displayTagButton();
     });
   },
