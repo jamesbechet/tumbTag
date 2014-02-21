@@ -1,9 +1,3 @@
-if (typeof(Storage) !== "undefined") {
-  window.canStoreList = true;
-} else {
-  window.canStoreList = false;
-}
-
 $('document').ready(function() {
   var tumbTag = {
     $newPost: $('.new_post_label, .reblog'),
@@ -22,24 +16,63 @@ $('document').ready(function() {
     init: function() {
       var that = this;
 
-      if (window.canStoreList) {
-        if (!window.localStorage.tags) {
-          // Add example tags list
-          window.localStorage.tags = JSON.stringify([{
-            name: 'Example',
-            list: ['tag1', 'tag2', 'tag3'],
-            selected: true
-          }]);
-        }
-        this.tags = JSON.parse(window.localStorage.tags);
-        this.getSelectedTagList();
-        setInterval(function() {
-          that.$newPost = $('.new_post_label, .reblog');
-          that.$newPost.click(that.createElems.bind(that));
-        }, 2000);
-        this.createElems();
+      if (window.localStorage.tags) {
+        this.syncStorages();
+      } else {
+        this.createExampleList();
       }
-    },
+
+      setInterval(function() {
+        that.$newPost = $('.new_post_label, .reblog');
+        that.$newPost.click(that.createElems.bind(that));
+      }, 2000);
+  },
+
+  displayTagButton: function() {
+    var that = this;
+
+    if (window.location.pathname && /new/i.test(window.location.pathname)) {
+      setTimeout(function() {
+        that.createElems()
+      }, 0);
+    }
+  },
+
+  // Retrieve tags in the localstorage and store it in chrome.storage
+  syncStorages: function() {
+    var that = this,
+        tags = JSON.parse(window.localStorage.tags);
+
+    chrome.storage.sync.set({'tags': tags});
+    chrome.storage.sync.get('tags', function(tags) {
+      that.tags = tags.tags;
+      that.getSelectedTagList();
+      that.createElems();
+      window.localStorage.clear();
+      that.displayTagButton();
+    });
+  },
+
+  // Create an example list when the tags' list is empty (after delete or at the beginning)
+  createExampleList: function() {
+    var that = this;
+
+    chrome.storage.sync.get('tags', function(tags){
+      if (!tags || !tags.tags || !tags.tags.length) {
+        chrome.storage.sync.set({'tags': [{name: 'Example', list: ['tag1', 'tag2', 'tag3'], selected: true}]});
+        chrome.storage.sync.get('tags', function(tags) {
+          that.tags = tags.tags;
+          that.tagsSelected = that.tags[0];
+          that.buildModifyView();
+          that.buildChooseView();
+        });
+      } else {
+        that.tags = tags.tags;
+      }
+        that.tagsSelected = that.tags[0];
+        that.displayTagButton();
+    });
+  },
 
   getSelectedTagList: function() {
       for (var i = 0; i < this.tags.length; i += 1) {
@@ -50,12 +83,9 @@ $('document').ready(function() {
       }
     },
 
-    createElems: function(e, i) {
+    createElems: function() {
       var that = this;
 
-      if (typeof e === 'number') {
-        i = e;
-      }
       setTimeout(function() {
         if ($('#create_post').length && !$('#add_tags').length) {
           $('#create_post').after(that.getTagBtnHtml());
@@ -69,43 +99,37 @@ $('document').ready(function() {
           that.$chooseListBtn = that.$optionsList.find('.choose_list');
           that.buildViews();
           that.bindElements();
-        } else if (i && i < 5 || !i) {
-          setTimeout(function() {
-            that.createElems((i || 0) + 1);
-          }, 500);
         }
       }, 0);
     },
 
-    bindElements: function() {
-      var that = this;
+    postTags: function() {
+      this.hideAllExceptMe();
+      var nbTags        = (!jQuery.isEmptyObject(this.tagsSelected) && this.tagsSelected.list.length) || 0,
+          $tagInput     = $('input.editor'),
+          $prevTagInput = $('div.editor_wrapper'),
+          $postContent  = $('div#post_content');
 
-      // Final action: Post tags
-      this.$tags.find('.post_tagss').first().click(function(e) {
-        that.hideAllExceptMe();
-        var nbTags        = (!jQuery.isEmptyObject(that.tagsSelected) && that.tagsSelected.list.length) || 0,
-            $tagInput     = $('input.editor'),
-            $prevTagInput = $('div.editor_wrapper'),
-            $postContent  = $('div#post_content');
-
-        for (var i = 0; i < nbTags; i += 1) {
-          if (i === (nbTags - 1)) { // Last value, different behavior
-            $tagInput.val(that.tagsSelected.list[i]);
-            $postContent.trigger('click'); // Add the last element, avoid one more click
-          } else { // Add span
-            $prevTagInput.before('<span class="tag">' + that.tagsSelected.list[i] + '</span>');
-          }
+      for (var i = 0; i < nbTags; i += 1) {
+        if (i === (nbTags - 1)) { // Last value, different behavior
+          $tagInput.val(this.tagsSelected.list[i]);
+          $postContent.trigger('click'); // Add the last element, avoid one more click
+        } else { // Add span
+          $prevTagInput.before('<span class="tag">' + this.tagsSelected.list[i] + '</span>');
         }
-        return false;
-      });
+      }
+      return false;
+    },
+
+    bindElements: function() {
+      // Final action: Post tags
+      this.$tags.find('.post_tagss').first().click(this.postTags.bind(this));
 
       // Show options
       this.$tags.find('.options').click(this.showOptions.bind(this));
 
       // Hide the options when the user click in the page (tumblr behavior)
-      $('body').click(function() {
-        that.hideAllExceptMe();
-      });
+      $('body').click(this.hideAllExceptMe.bind(this));
 
       // Avoid to hide the options (body click event)
       $('#post_tag_options .post_options').click(function() {
@@ -120,7 +144,7 @@ $('document').ready(function() {
 
     // HTML strings
     getOptionHtml: function(optionName, selected, isDeletable) {
-      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '">' + optionName + (isDeletable ? '<i class="delete" href="#" style="float:right; color:#f00; font-size: 16px; font-style: none;">X</i>' : '') + '</div></li>';
+      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '" style="width: 250px">' + '<span style="display: inline-block; float: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis">' + optionName + '</span>' + (isDeletable ? '<i class="delete" href="#" style="margin-left: 10px; display: inline-block; float: right; color:#f00; font-size: 16px; font-style: none;">X</i>' : '') + '</div></li>';
     },
 
     getTextAreaHtml: function(optionName, tagsObj) {
@@ -133,7 +157,7 @@ $('document').ready(function() {
 
     getOptionsHtml: function(optionsId) {
       return '<div id="' + optionsId + '" style="position:absolute;top:5px;right:28px" class="">' + 
-             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px; max-height: 352px; overflow-y: scroll;">' + 
+             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px; max-height: 352px; overflow: auto;">' + 
              '<div class="popover_inner"><ul></ul></div></div></div>';
     },
 
@@ -174,7 +198,7 @@ $('document').ready(function() {
       for (var i = 0; i < this.tags.length; i += 1) {
         this.tags[i].selected = false;
       }
-      window.localStorage.tags = JSON.stringify(this.tags);
+      chrome.storage.sync.set({'tags': this.tags});
     },
 
 
@@ -194,7 +218,7 @@ $('document').ready(function() {
     },
 
     _createList: function(modify, e) {
-      var tags     = this.$createList.find('textarea').val().replace(/\r\n/g, "\n").split("\n"),
+      var tags = this.$createList.find('textarea').val().replace(/\r\n/g, "\n").split("\n"),
           listName;
 
       if (modify !== true || (modify && this.$createList.find('input').val() !== this.tagsSelected.name)) {
@@ -214,7 +238,7 @@ $('document').ready(function() {
         this.tags.push({ name: listName, list: tags, selected: true });
         this.tagsSelected = this.tags[this.tags.length - 1];
       }
-      window.localStorage.tags = JSON.stringify(this.tags);
+      chrome.storage.sync.set({'tags': this.tags});
       this.$createList.hide();
       this.buildChooseView();
       this.buildModifyView();
@@ -241,7 +265,7 @@ $('document').ready(function() {
           break ;
         }
       }
-      window.localStorage.tags = JSON.stringify(this.tags);
+      chrome.storage.sync.set({'tags': this.tags});
     },
 
     _chooseList: function(e) {
@@ -294,8 +318,8 @@ $('document').ready(function() {
     },
 
     _deleteList: function(e) {
-      var that = this,
-          name = $(e.currentTarget).parent().parent().attr('class'),
+      var that        = this,
+          name        = $(e.currentTarget).parent().parent().attr('class'),
           wasSelected = false;
 
       for (var i = 0; i < this.tags.length; i += 1) {
@@ -313,7 +337,13 @@ $('document').ready(function() {
       } else if (wasSelected) {
         this.tagsSelected = {};
       }
-      window.localStorage.tags = JSON.stringify(this.tags);
+      // When we updated the list, check if there is still a list available otherwise create the example one
+      chrome.storage.sync.set({'tags': this.tags}, function() {
+        if (!that.tags.length) {
+          that.hideAllExceptMe();
+          that.createExampleList();
+        }
+      });
       this.buildModifyView();
       this.buildChooseView();
       setTimeout(function() {
@@ -343,13 +373,10 @@ $('document').ready(function() {
       }
       this.$tags.find('.options').after(this.getOptionsHtml('choose_list_view'));
       this.$chooseList = $('#choose_list_view').find('.post_options');
-      if (window.localStorage.tags) {
-        this.tags = JSON.parse(window.localStorage.tags);
-        for (var i = 0; i < this.tags.length; i += 1) {
-          this.addOption(this.$chooseList.find('ul'), this.getOptionHtml(this.tags[i].name, this.tags[i].selected));
-        }
-        this.$chooseList.find('li').click(this._chooseList.bind(this));
+      for (var i = 0; i < this.tags.length; i += 1) {
+        this.addOption(this.$chooseList.find('ul'), this.getOptionHtml(this.tags[i].name, this.tags[i].selected));
       }
+      this.$chooseList.find('li').click(this._chooseList.bind(this));
       $('#choose_list_view .post_options').click(function() {
         return false;
       });
@@ -359,7 +386,7 @@ $('document').ready(function() {
     hideAllExceptMe: function($selector) {
       this.selectorsHideable.forEach(function(sel) {
         // Why the parrent ? Because the $selector is the real content that we show/hide and that doesn't have an ID
-        if (($selector && $selector.parent().attr('id')) !== $('#' + sel).attr('id') || !$selector) {
+        if (!$selector || ($selector && !$selector.currentTarget && $selector.parent().attr('id') !== $('#' + sel).attr('id'))) {
           $('#' + sel).find('.post_options').hide();
         }
       });
