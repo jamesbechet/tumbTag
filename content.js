@@ -1,6 +1,5 @@
 $('document').ready(function() {
   var tumbTag = {
-    $newPost: $('.new_post_label, .reblog'),
     tagsSelected: {},
     tags: [],
     $tags: [],
@@ -22,20 +21,12 @@ $('document').ready(function() {
         this.createExampleList();
       }
 
+      // Every 2 secs check if there is a tag (input[tumblr's side]) elements (less complicated than handle every case of post/reblog)
       setInterval(function() {
-        that.$newPost = $('.new_post_label, .reblog');
-        that.$newPost.click(that.createElems.bind(that));
+        if ($('.tags').length) {
+          that.createElems();
+        }
       }, 2000);
-  },
-
-  displayTagButton: function() {
-    var that = this;
-
-    if (window.location.pathname && /new/i.test(window.location.pathname)) {
-      setTimeout(function() {
-        that.createElems()
-      }, 0);
-    }
   },
 
   // Retrieve tags in the localstorage and store it in chrome.storage
@@ -49,7 +40,6 @@ $('document').ready(function() {
       that.getSelectedTagList();
       that.createElems();
       window.localStorage.clear();
-      that.displayTagButton();
     });
   },
 
@@ -70,7 +60,6 @@ $('document').ready(function() {
         that.tags = tags.tags;
         that.getSelectedTagList();
       }
-        that.displayTagButton();
     });
   },
 
@@ -87,7 +76,7 @@ $('document').ready(function() {
       var that = this;
 
       setTimeout(function() {
-        if ($('#create_post').length && !$('#add_tags').length) {
+        if (!$('#add_tags').length) {
           $('#create_post').after(that.getTagBtnHtml());
           that.$tags = $('#add_tags');
           // Options
@@ -144,7 +133,10 @@ $('document').ready(function() {
 
     // HTML strings
     getOptionHtml: function(optionName, selected, isDeletable) {
-      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '" style="width: 250px">' + '<span style="display: inline-block; float: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis">' + optionName + '</span>' + (isDeletable ? '<i class="delete" href="#" style="margin-left: 10px; display: inline-block; float: right; color:#f00; font-size: 16px; font-style: none;">X</i>' : '') + '</div></li>';
+      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '" style="width: 250px">' + 
+             '<span style="display: inline-block; float: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis">' + optionName + '</span>' + 
+             (isDeletable ? '<i class="delete" href="#" style="margin-left: 10px; display: inline-block; float: right; color:#f00; font-size: 16px; font-style: none;">X</i>' : '') 
+             + '</div></li>';
     },
 
     getTextAreaHtml: function(optionName, tagsObj) {
@@ -273,6 +265,7 @@ $('document').ready(function() {
       this.setTagsSelected(e.currentTarget);
       this.buildChooseView();
       this.buildModifyView();
+      return false;
     },
 
     buildViews: function() {
@@ -386,7 +379,7 @@ $('document').ready(function() {
     hideAllExceptMe: function($selector) {
       this.selectorsHideable.forEach(function(sel) {
         // Why the parrent ? Because the $selector is the real content that we show/hide and that doesn't have an ID
-        if (!$selector || ($selector && !$selector.currentTarget && $selector.parent().attr('id') !== $('#' + sel).attr('id'))) {
+        if (!$selector || ($selector && $selector.currentTarget) || ($selector && $selector.parent().attr('id') !== $('#' + sel).attr('id'))) {
           $('#' + sel).find('.post_options').hide();
         }
       });
