@@ -11,7 +11,7 @@
 
 ## How it works ?
 
-![TumbTag screenshot](//static.tumblr.com/nc9sq5s/Fb1ncxrid/tumbtag.png "A screenshot of how TumbTag is fitting in Tumblr's layout.")
+![TumbTag screenshot](https://raw.github.com/jboulouloubi/tumbtag/master/tumbtag.png "A screenshot of how TumbTag is fitting in Tumblr's layout.")
 
 When I wanted to post something on tumblr, I had to go through all my favorite tags (\#hashtags). Since I'm using **TumbTag**, I just have to click on one button and my tags are added.
 
