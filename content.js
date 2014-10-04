@@ -133,35 +133,35 @@ $('document').ready(function() {
 
     // HTML strings
     getOptionHtml: function(optionName, selected, isDeletable) {
-      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '" style="width: 250px">' + 
-             '<span style="display: inline-block; float: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis">' + optionName + '</span>' + 
-             (isDeletable ? '<i class="delete" href="#" style="margin-left: 10px; display: inline-block; float: right; color:#f00; font-size: 16px; font-style: none;">X</i>' : '') 
+      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '" style="width: 250px">' +
+             '<span style="display: inline-block; float: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis">' + optionName + '</span>' +
+             (isDeletable ? '<i class="delete" href="#" style="margin-left: 10px; display: inline-block; float: right; color:#f00; font-size: 16px; font-style: none;">X</i>' : '')
              + '</div></li>';
     },
 
     getTextAreaHtml: function(optionName, tagsObj) {
-      return '<li style="text-align:center;" class="' + optionName + 
-             '"><input style="display:block;margin:10px auto" type="text" value="' + (tagsObj ? tagsObj.name: 'List name') + 
+      return '<li style="text-align:center;" class="' + optionName +
+             '"><input style="display:block;margin:10px auto" type="text" value="' + (tagsObj ? tagsObj.name: 'List name') +
              '"><textarea style="height:250px;" id="tags-list" style="" name="TagsList">' + (tagsObj ? tagsObj.list.toString().replace(/,/g, '\n') : 'tag1\ntag2\ntag3') +
-             '</textarea></li><li style="text-align:center;"><button class="chrome blue txt ' + (tagsObj ? 'modify_button' : 'create_button') + 
+             '</textarea></li><li style="text-align:center;"><button class="chrome blue txt ' + (tagsObj ? 'modify_button' : 'create_button') +
              '"' +  'style="cursor: pointer; margin-top: 5px; border-radius: 4px;">' + (tagsObj ? 'Modify' : 'Create') + '</button></li>'
     },
 
     getOptionsHtml: function(optionsId) {
-      return '<div id="' + optionsId + '" style="position:absolute;top:5px;right:28px" class="">' + 
-             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px; max-height: 352px; overflow: auto;">' + 
+      return '<div id="' + optionsId + '" style="position:absolute;top:5px;right:28px" class="">' +
+             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px; max-height: 352px; overflow: auto;">' +
              '<div class="popover_inner"><ul></ul></div></div></div>';
     },
 
     getTagBtnHtml: function() {
-      return '<div href="#" class="split" id="add_tags" style="margin-left:10px;">' + 
+      return '<div href="#" class="split" id="add_tags" style="margin-left:10px;">' +
              '<button class="chrome blue txt post_tagss">Tags</button><div class="chrome blue options"></div></div>';
     },
 
     getOptionsMenuHtml: function() {
-      return '<div id="post_tag_options" style="position:absolute;top:5px;right:28px" class="">' + 
-             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px;">' + 
-             '<div class="popover_inner"><ul><li class="create_list"><div class="option">Create List</div></li><li class="choose_list"><div class="option">Choose List</div>' + 
+      return '<div id="post_tag_options" style="position:absolute;top:5px;right:28px" class="">' +
+             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px;">' +
+             '<div class="popover_inner"><ul><li class="create_list"><div class="option">Create List</div></li><li class="choose_list"><div class="option">Choose List</div>' +
              '</li><li class="modify_list"><div class="option">Modify List</div></li></ul></div></div></div>';
     },
 
@@ -200,7 +200,7 @@ $('document').ready(function() {
       this.$optionsList.show();
       this.hideAllExceptMe(this.$optionsList)
       return false;
-    }, 
+    },
 
     createList: function() {
       this.buildCreateView();
@@ -220,7 +220,7 @@ $('document').ready(function() {
       }
 
       tags = tags.filter(function (tag) { return tag !== ''; });
-      this.clearListOfSelected();        
+      this.clearListOfSelected();
 
       if (modify === true) {
         this.tagsSelected.name = listName;
@@ -386,5 +386,5 @@ $('document').ready(function() {
     },
 
   };
-  tumbTag.init();  
+  tumbTag.init();
 });

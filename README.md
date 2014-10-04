@@ -1,17 +1,19 @@
 # TumbTag - Post your favorite tags in one click [Chrome Extension](https://chrome.google.com/webstore/detail/tumbtag-tumblr-easy-add-t/cmbakfeanhaniakabiiabhdjkhgbbdmp/related?utm_source=chrome-ntp-icon)
 =======
 
-#### Make your life easier posting on Tumblr.
+#### Add a "Tags" button on the Tumblr dashboard
 
 ## Features:
 
-- Create lists of tags saved in the browser (localStorage)
-- Post the tags on your post in one click
-- Tags button fits with tumblr layouts and design
+- Post your favorite tags in **one click**
+- Tags button fits with the **Tumblr's layout**
+- Create/Update/Delet lists of tags **saved in the browser** (chrome.storage)
 
 ## How it works ?
 
-When I wanted to post anything on tumblr, I had to go through all my tags (\#hashtags). Not even a copy-paste worked, so I created TumbTag. This chrome extensions allows you to store your favorite tags and post in one click.
+![TumbTag screenshot](//static.tumblr.com/nc9sq5s/Fb1ncxrid/tumbtag.png "A screenshot of how TumbTag is fitting in Tumblr's layout.")
+
+When I wanted to post something on tumblr, I had to go through all my favorite tags (\#hashtags). Since I'm using **TumbTag**, I just have to click on one button and my tags are added.
 
 ## MIT License (MIT)
 
