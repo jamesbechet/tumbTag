@@ -5,14 +5,15 @@ $(function() {
     $tumbTagSelector : null,
     tumbTagElem      : '<div id="tumbTag"></div>',
     tumbTagElemCss   : {
-      'position'      : 'absolute',
-      'left'          : '1200px',
-      'top'           : '400px',
-      'transform'     : 'translateX(-50%) translateY(-100%)',
-      'z-index'       : '1011',
-      'width'         : '200px',
-      'color'         : '#fff',
-      'margin-bottom' : '1em'
+      'position'           : 'absolute',
+      'left'               : '1200px',
+      'top'                : '400px',
+      '-webkit-transform'  : 'translateX(-50%) translateY(-100%)',
+      'z-index'            : '1011',
+      'width'              : '200px',
+      'color'              : '#fff',
+      'margin-bottom'      : '1em',
+      '-webkit-transition' : 'top .3s ease-in-out'
     },
 
     $actionsSelector : null,
