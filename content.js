@@ -152,12 +152,19 @@ $(function() {
     },
 
     adjustPosition: function () {
-      var postTop    = $('.post-container').offset().top,
-          postLeft   = $('.post-container').offset().left,
-          postHeight = $('.post-container').height(),
-          postWidth  = $('.post-container').width()
+      var $postContainer = $('.post-container')
+      var postTop        = $postContainer.offset().top
+      var postLeft       = $postContainer.offset().left
+      var postHeight     = $postContainer.height()
+      var postWidth      = $postContainer.width()
 
-      this.$tumbTagSelector.css('top', (postTop + postHeight + 200).toString() + 'px')
+      var finalTop = (postTop + postHeight + 250)
+      // It's a modal (a.k.a reblog), the page is not scrollable like usual
+      // therefore place the tumbTag element at a different posisition
+      if ($postContainer.parents('.post-forms-modal').length) {
+        finalTop = (postTop + postHeight)
+      }
+      this.$tumbTagSelector.css('top', finalTop.toString() + 'px')
       this.$tumbTagSelector.css('left', (postLeft + postWidth + 200).toString() + 'px')
     },
 
@@ -260,14 +267,14 @@ $(function() {
       this.$addListSelector.append(this.addListNameElem)
       this.$addListNameSelector = $('#tumbTag-addListName')
       this.$addListNameSelector.css(this.addListNameElemCss)
-      this.$addListNameSelector.before('<p style="font-size:13pxfont-weight:700pxcolor:#444">List name</p>')
+      this.$addListNameSelector.before('<p style="font-size:13px;font-weight:700px;color:#444">List name</p>')
       this.$addListNameSelector.val('Blogging')
 
       // List tags
       this.$addListSelector.append(this.addListTagsElem)
       this.$addListTagsSelector = $('#tumbTag-addListTags')
       this.$addListTagsSelector.css(this.addListTagsElemCss)
-      this.$addListTagsSelector.before('<p style="font-size:13pxfont-weight:700pxcolor:#444">List tags</p>')
+      this.$addListTagsSelector.before('<p style="font-size:13px;font-weight:700px;color:#444">List tags</p>')
       this.$addListTagsSelector.val('tag1\ntag2\ntag3')
 
       // Validate List
