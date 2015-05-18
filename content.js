@@ -1,390 +1,391 @@
-$('document').ready(function() {
+$(function() {
   var tumbTag = {
-    tagsSelected: {},
-    tags: [],
-    $tags: [],
-    $optionsList: [],
-    $createList: [],
-    $modifyList: [],
-    $chooseList: [],
-    $createListBtn: [],
-    $modifyListBtn: [],
-    $chooseListBtn: [],
-    selectorsHideable: ['post_tag_options', 'create_list_view', 'modify_list_view', 'choose_list_view'],
+    tags : [],
 
-    init: function() {
-      var that = this;
-
-      if (window.localStorage.tags) {
-        this.syncStorages();
-      } else {
-        this.createExampleList();
-      }
-
-      // Every 2 secs check if there is a tag (input[tumblr's side]) elements (less complicated than handle every case of post/reblog)
-      setInterval(function() {
-        if ($('.tags').length) {
-          that.createElems();
-        }
-      }, 2000);
-  },
-
-  // Retrieve tags in the localstorage and store it in chrome.storage
-  syncStorages: function() {
-    var that = this,
-        tags = JSON.parse(window.localStorage.tags);
-
-    chrome.storage.sync.set({'tags': tags});
-    chrome.storage.sync.get('tags', function(tags) {
-      that.tags = tags.tags;
-      that.getSelectedTagList();
-      that.createElems();
-      window.localStorage.clear();
-    });
-  },
-
-  // Create an example list when the tags' list is empty (after delete or at the beginning)
-  createExampleList: function() {
-    var that = this;
-
-    chrome.storage.sync.get('tags', function(tags){
-      if (!tags || !tags.tags || !tags.tags.length) {
-        chrome.storage.sync.set({'tags': [{name: 'Example', list: ['tag1', 'tag2', 'tag3'], selected: true}]});
-        chrome.storage.sync.get('tags', function(tags) {
-          that.tags = tags.tags;
-          that.tagsSelected = that.tags[0];
-          that.buildModifyView();
-          that.buildChooseView();
-        });
-      } else {
-        that.tags = tags.tags;
-        that.getSelectedTagList();
-      }
-    });
-  },
-
-  getSelectedTagList: function() {
-      for (var i = 0; i < this.tags.length; i += 1) {
-        if (this.tags[i].selected === true) {
-          this.tagsSelected = this.tags[i];
-          break;
-        }
-      }
+    $tumbTagSelector : null,
+    tumbTagElem      : '<div id="tumbTag"></div>',
+    tumbTagElemCss   : {
+      'position'      : 'absolute',
+      'left'          : '1200px',
+      'top'           : '400px',
+      'transform'     : 'translateX(-50%) translateY(-100%)',
+      'z-index'       : '1011',
+      'width'         : '200px',
+      'color'         : '#fff',
+      'margin-bottom' : '1em'
     },
 
-    createElems: function() {
-      var that = this;
-
-      setTimeout(function() {
-        if (!$('#add_tags').length) {
-          $('#create_post').after(that.getTagBtnHtml());
-          that.$tags = $('#add_tags');
-          // Options
-          that.$tags.find('.options').after(that.getOptionsMenuHtml());
-          that.$optionsList = $('#post_tag_options').find('.post_options');
-          // Options actions
-          that.$createListBtn = that.$optionsList.find('.create_list');
-          that.$modifyListBtn = that.$optionsList.find('.modify_list');
-          that.$chooseListBtn = that.$optionsList.find('.choose_list');
-          that.buildViews();
-          that.bindElements();
-        }
-      }, 0);
+    $actionsSelector : null,
+    actionsElem      : '<div id="tumbTag-actions"></div>',
+    actionsElemCss   : {
+      'font-size'     : '1.5em',
+      'cursor'        : 'pointer',
+      'margin-bottom' : '.5em'
     },
 
-    postTags: function() {
-      this.hideAllExceptMe();
-      var nbTags        = (!jQuery.isEmptyObject(this.tagsSelected) && this.tagsSelected.list.length) || 0,
-          $tagInput     = $('input.editor'),
-          $prevTagInput = $('div.editor_wrapper'),
-          $postContent  = $('div#post_content');
-
-      for (var i = 0; i < nbTags; i += 1) {
-        if (i === (nbTags - 1)) { // Last value, different behavior
-          $tagInput.val(this.tagsSelected.list[i]);
-          $postContent.trigger('click'); // Add the last element, avoid one more click
-        } else { // Add span
-          $prevTagInput.before('<span class="tag">' + this.tagsSelected.list[i] + '</span>');
-        }
-      }
-      return false;
+    $iconAddSelector : null,
+    iconAddElem      : '<i class="icon_edit_pencil"></i>',
+    iconAddElemCss   : {
+      'font-size'   : '1.5em',
+      'line-height' : '1em'
     },
 
-    bindElements: function() {
-      // Final action: Post tags
-      this.$tags.find('.post_tagss').first().click(this.postTags.bind(this));
-
-      // Show options
-      this.$tags.find('.options').click(this.showOptions.bind(this));
-
-      // Hide the options when the user click in the page (tumblr behavior)
-      $('body').click(this.hideAllExceptMe.bind(this));
-
-      // Avoid to hide the options (body click event)
-      $('#post_tag_options .post_options').click(function() {
-        return false;
-      });
-
-      // Bind the actions available on the options
-      this.$createListBtn.click(this.createList.bind(this));
-      this.$modifyListBtn.click(this.modifyList.bind(this));
-      this.$chooseListBtn.click(this.chooseList.bind(this));
+    $addListSelector : $('<div id="tumbTag-addList"></div>'),
+    addListElemCss   : {
+      'width'            : '200px',
+      'height'           : '250px',
+      'background-color' : '#fff',
+      'box-sizing'       : 'border-box',
+      'padding'          : '1em'
     },
 
-    // HTML strings
-    getOptionHtml: function(optionName, selected, isDeletable) {
-      return '<li class="' + optionName + '"><div class="option ' + (selected ? 'selected': '') + '" style="width: 250px">' +
-             '<span style="display: inline-block; float: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis">' + optionName + '</span>' +
-             (isDeletable ? '<i class="delete" href="#" style="margin-left: 10px; display: inline-block; float: right; color:#f00; font-size: 16px; font-style: none;">X</i>' : '')
-             + '</div></li>';
+    $addListNameSelector : null,
+    addListNameElem      : '<input id="tumbTag-addListName"></input>',
+    addListNameElemCss   : {
+      'width'         : '100%',
+      'margin-bottom' : '1em'
     },
 
-    getTextAreaHtml: function(optionName, tagsObj) {
-      return '<li style="text-align:center;" class="' + optionName +
-             '"><input style="display:block;margin:10px auto" type="text" value="' + (tagsObj ? tagsObj.name: 'List name') +
-             '"><textarea style="height:250px;" id="tags-list" style="" name="TagsList">' + (tagsObj ? tagsObj.list.toString().replace(/,/g, '\n') : 'tag1\ntag2\ntag3') +
-             '</textarea></li><li style="text-align:center;"><button class="chrome blue txt ' + (tagsObj ? 'modify_button' : 'create_button') +
-             '"' +  'style="cursor: pointer; margin-top: 5px; border-radius: 4px;">' + (tagsObj ? 'Modify' : 'Create') + '</button></li>'
+    $addListTagsSelector : null,
+    addListTagsElem      : '<textarea id="tumbTag-addListTags"></textarea>',
+    addListTagsElemCss   : {
+      'width'  : '100%',
+      'height' : '100px'
     },
 
-    getOptionsHtml: function(optionsId) {
-      return '<div id="' + optionsId + '" style="position:absolute;top:5px;right:28px" class="">' +
-             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px; max-height: 352px; overflow: auto;">' +
-             '<div class="popover_inner"><ul></ul></div></div></div>';
+    $addListButtonSelector : null,
+    addListButtonElem      : '<button id="tumbTag-addListButton">Done</button>',
+    addListButtonElemCss   : {
+      'padding'          : '.5em 1em',
+      'display'          : 'block',
+      'margin'           : '0 auto',
+      'background-color' : '#529ecc'
     },
 
-    getTagBtnHtml: function() {
-      return '<div href="#" class="split" id="add_tags" style="margin-left:10px;">' +
-             '<button class="chrome blue txt post_tagss">Tags</button><div class="chrome blue options"></div></div>';
+    $tagListsSelector : null,
+    tagListsElem      : '<ul id="tumbTag-tagLists"></ul>',
+    tagListsElemCss   : {
+      'height'     : '250px',
+      'overflow-y' : 'scroll'
+    },
+    listElem          : '<li class="tumbTag-list"></li>',
+    listElemCss       : {
+      'cursor'           : 'pointer',
+      'padding'          : '10px',
+      'background-color' : 'rgba(0, 0, 0, 0.07)',
+      'margin-bottom'    : '1em'
     },
 
-    getOptionsMenuHtml: function() {
-      return '<div id="post_tag_options" style="position:absolute;top:5px;right:28px" class="">' +
-             '<div class="post_options popover popover_gradient popover_menu popover_post_options south" style="display: none; top: auto; bottom: 11px;">' +
-             '<div class="popover_inner"><ul><li class="create_list"><div class="option">Create List</div></li><li class="choose_list"><div class="option">Choose List</div>' +
-             '</li><li class="modify_list"><div class="option">Modify List</div></li></ul></div></div></div>';
+    $iconRemoveSelector : null,
+    iconRemoveElem      : '<i class="icon_close"></i>',
+    iconRemoveElemCss   : {
+      'float'        : 'right',
+      'margin-right' : '.4em',
+      'font-size'    : '1.3em',
+      'line-height'  : '1em'
     },
 
+    init: function () {
+      var that          = this,
+          getStoredTags = window.localStorage.tags ? this.syncStorages.bind(this) : this.getSavedTags.bind(this)
 
-    // Utils //
-
-    addOption: function($selector, optionHtml) {
-      if ($selector.prop('tagName') === 'UL') {
-        $selector.append(optionHtml);
-      } else if ($selector.prop('tagName') === 'LI') {
-        $selector.after(optionHtml);
-      }
+      getStoredTags().
+        then(function (tags) {
+          that.tags = tags
+          that.periodicallyCheckIfRender()
+        })
     },
 
-    // Handle the case of same List's name
-    checkListName: function(name) {
-      for (var i = 0; i < this.tags.length; i += 1) {
-        if (name === this.tags[i].name) {
-          return (this.checkListName(name + '-' + 1))
-        }
-      }
-      return name;
+    appendTags: function ($selector) {
+      var $shouldAppendTo = $('.tag-input-wrapper .editor-plaintext'),
+          tagObj          = this.tags[$selector.index()]
+
+
+      _.each(tagObj.list, function (tag) {
+        $shouldAppendTo.append('<span>' + tag + '</span>')
+        $shouldAppendTo.trigger('focus')
+        $shouldAppendTo.trigger('blur')
+      })
+
+      setTimeout(function () {
+        $('.tag-input-wrapper .editor-placeholder').text('')
+      }, 0)
     },
 
-    clearListOfSelected: function($selector) {
-      for (var i = 0; i < this.tags.length; i += 1) {
-        this.tags[i].selected = false;
-      }
-      chrome.storage.sync.set({'tags': this.tags});
+    removeList: function ($selector) {
+      this.tags = _.reject(this.tags, function (tagObj) {
+        return tagObj.name === $selector.parent().text()
+      })
+
+      chrome.storage.sync.set({ 'tags' : this.tags })
+      $selector.parent().remove()
+      this.adjustPosition()
     },
 
+    bindNewTagListsEvent: function () {
+      var that = this
 
-    // Views //
+      $('.tumbTag-list').last().click(function (e) {
+        that.appendTags($(e.currentTarget))
+        return false
+      })
 
-    showOptions: function() {
-      this.$optionsList.show();
-      this.hideAllExceptMe(this.$optionsList)
-      return false;
-    },
-
-    createList: function() {
-      this.buildCreateView();
-      this.hideAllExceptMe(this.$createList);
-      this.$createList.show();
-      return false;
-    },
-
-    _createList: function(modify, e) {
-      var tags = this.$createList.find('textarea').val().replace(/\r\n/g, "\n").split("\n"),
-          listName;
-
-      if (modify !== true || (modify && this.$createList.find('input').val() !== this.tagsSelected.name)) {
-        listName = this.checkListName(this.$createList.find('input').val());
-      } else if (modify === true) {
-        listName = this.$createList.find('input').val();
-      }
-
-      tags = tags.filter(function (tag) { return tag !== ''; });
-      this.clearListOfSelected();
-
-      if (modify === true) {
-        this.tagsSelected.name = listName;
-        this.tagsSelected.list = tags;
-        this.tagsSelected.selected = true;
-      } else {
-        this.tags.push({ name: listName, list: tags, selected: true });
-        this.tagsSelected = this.tags[this.tags.length - 1];
-      }
-      chrome.storage.sync.set({'tags': this.tags});
-      this.$createList.hide();
-      this.buildChooseView();
-      this.buildModifyView();
-      return false;
-    },
-
-    modifyList: function() {
-      this.hideAllExceptMe(this.$modifyList)
-      this.$modifyList.show();
-      return false;
-    },
-
-    chooseList: function() {
-      this.hideAllExceptMe(this.$chooseList);
-      this.$chooseList.show();
-      return false;
-    },
-
-    setTagsSelected: function(selector) {
-      for (var i = 0; i < this.tags.length; i += 1) {
-        if ($(selector).attr('class') === this.tags[i].name) {
-          this.tags[i].selected = true;
-          this.tagsSelected = this.tags[i];
-          break ;
-        }
-      }
-      chrome.storage.sync.set({'tags': this.tags});
-    },
-
-    _chooseList: function(e) {
-      this.clearListOfSelected();
-      this.setTagsSelected(e.currentTarget);
-      this.buildChooseView();
-      this.buildModifyView();
-      return false;
-    },
-
-    buildViews: function() {
-      this.buildCreateView();
-      this.buildModifyView();
-      this.buildChooseView();
-    },
-
-    // Building Create List View
-    buildCreateView: function(tagsObj) {
-      if (this.$createList.length) {
-        this.$createList.parent().remove();
-      }
-      this.$tags.find('.options').after(this.getOptionsHtml('create_list_view'));
-      this.$createList = $('#create_list_view').find('.post_options');
-      this.addOption(this.$createList.find('ul'), this.getTextAreaHtml('create_list_view', tagsObj));
-      this.$createList.find('.create_button').click(this._createList.bind(this));
-      this.$createList.find('.modify_button').click(this._createList.bind(this, true));
-      $('#create_list_view .post_options').click(function() {
-        return false;
+      $('.icon_close').last().click(function (e) {
+        that.removeList($(e.currentTarget))
+        return false
       })
     },
 
-    // Building Modify List View
-    buildModifyView: function() {
-      var that = this;
+    bindTagListsEvent: function () {
+      var that = this
 
-      if (this.$modifyList.length) {
-        this.$modifyList.parent().remove();
-      }
-      this.$tags.find('.options').after(this.getOptionsHtml('modify_list_view'));
-      this.$modifyList = $('#modify_list_view').find('.post_options');
-      if (this.tags) {
-        this.tags.forEach(function(tagObj) {
-          that.addOption(that.$modifyList.find('ul'), that.getOptionHtml(tagObj.name, tagObj.selected, true));
-        });
-        this.$modifyList.find('li').click(this._modifyList.bind(this));
-        this.$modifyList.find('.delete').click(this._deleteList.bind(this));
-      }
-      $('#modify_list_view .post_options').click(function() {
-        return false;
+      $('.tumbTag-list').click(function (e) {
+        that.appendTags($(e.currentTarget))
+        return false
+      })
+
+      $('.icon_close').click(function (e) {
+        that.removeList($(e.currentTarget))
+        return false
       })
     },
 
-    _deleteList: function(e) {
-      var that        = this,
-          name        = $(e.currentTarget).parent().parent().attr('class'),
-          wasSelected = false;
+    adjustPosition: function () {
+      var postTop    = $('.post-container').offset().top,
+          postLeft   = $('.post-container').offset().left,
+          postHeight = $('.post-container').height(),
+          postWidth  = $('.post-container').width()
 
-      for (var i = 0; i < this.tags.length; i += 1) {
-        if (this.tags[i].name === name) {
-          wasSelected = this.tags[i].selected;
-          this.tags.splice(i, 1);
-          break ;
-        }
-      }
-
-      // When we delete a list, change the selected list
-      if (wasSelected && this.tags.length) {
-        this.tagsSelected = this.tags[this.tags.length - 1];
-        this.tagsSelected.selected = true;
-      } else if (wasSelected) {
-        this.tagsSelected = {};
-      }
-      // When we updated the list, check if there is still a list available otherwise create the example one
-      chrome.storage.sync.set({'tags': this.tags}, function() {
-        if (!that.tags.length) {
-          that.hideAllExceptMe();
-          that.createExampleList();
-        }
-      });
-      this.buildModifyView();
-      this.buildChooseView();
-      setTimeout(function() {
-        that.$modifyList.show();
-      }, 0);
+      this.$tumbTagSelector.css('top', (postTop + postHeight).toString() + 'px')
+      this.$tumbTagSelector.css('left', (postLeft + postWidth + 200).toString() + 'px')
     },
 
-    _modifyList: function(e) {
-      for (var i = 0; i < this.tags.length; i += 1) {
-        if ($(e.currentTarget).attr('class') === this.tags[i].name) {
-          break ;
+    appendTagLists: function () {
+      var that = this
+
+      this.$tumbTagSelector.append(this.tagListsElem)
+      this.$tagListsSelector = $('#tumbTag-tagLists')
+      this.$tagListsSelector.css(this.tagListsElemCss)
+
+      _.each(this.tags, function (tagObj) {
+        that.$tagListsSelector.append('<li class="tumbTag-list">' + tagObj.name + that.iconRemoveElem + '</li>')
+      })
+
+      $('.tumbTag-list').css(this.listElemCss)
+      $('.icon_close').css(this.iconRemoveElemCss)
+      this.bindTagListsEvent()
+    },
+
+    setListName: function (listName) {
+      var tags         = this.tags,
+          loop         = 5,
+          existingName = listName
+
+      existingName = _.find(tags, function (tagObj) {
+        return tagObj.name === listName
+      })
+
+      while (existingName && loop) {
+        listName     = listName + '1'
+        existingName = _.find(tags, function (tagObj) {
+          return tagObj.name === listName
+        })
+        loop--
+      }
+
+      return listName
+    },
+
+    storeList: function (name, list) {
+      this.tags.push({
+        name : name,
+        list : list
+      })
+
+      chrome.storage.sync.set({ tags: this.tags })
+
+      return _.last(this.tags)
+    },
+
+    appendNewList: function (newList) {
+      this.$addListSelector.hide('medium')
+      this.$tagListsSelector
+        .append('<li class="tumbTag-list">' + newList.name + this.iconRemoveElem + '</li>')
+
+      $('.tumbTag-list').css(this.listElemCss)
+      $('.icon_close').css(this.iconRemoveElemCss)
+      this.bindNewTagListsEvent()
+
+      this.adjustPosition()
+    },
+
+    bindValidateList: function () {
+      var that = this,
+          newList,
+          listName,
+          tags
+
+      this.$addListButtonSelector.click(function (e) {
+        listName = that.setListName(that.$addListNameSelector.val() || 'test')
+        tags     = that.$addListTagsSelector.val().replace(/\r\n/g, '\n').split('\n')
+        tags     = _.filter(tags, function (tag) { return !!tag })
+
+        newList = that.storeList(listName, tags)
+        that.appendNewList(newList)
+        return false
+      })
+    },
+
+    buildNewList: function () {
+      if (!this.$addListSelector) {
+        this.$addListSelector = $('#tumbTag-addList')
+        return this.$addListSelector.show('medium')
+      }
+
+      if (this.$addListSelector.css('display') === 'block') {
+        return this.$addListSelector.hide('medium')
+      }
+
+      if ($('#tumbTag-addList').length) {
+        return this.$addListSelector.show('medium')
+      }
+
+      // Container
+      this.$addListSelector.hide()
+      this.$iconAddSelector.after(this.$addListSelector)
+      this.$addListSelector.css(this.addListElemCss)
+
+      // List name
+      this.$addListSelector.append(this.addListNameElem)
+      this.$addListNameSelector = $('#tumbTag-addListName')
+      this.$addListNameSelector.css(this.addListNameElemCss)
+      this.$addListNameSelector.before('<p style="font-size:13pxfont-weight:700pxcolor:#444">List name</p>')
+      this.$addListNameSelector.val('Blogging')
+
+      // List tags
+      this.$addListSelector.append(this.addListTagsElem)
+      this.$addListTagsSelector = $('#tumbTag-addListTags')
+      this.$addListTagsSelector.css(this.addListTagsElemCss)
+      this.$addListTagsSelector.before('<p style="font-size:13pxfont-weight:700pxcolor:#444">List tags</p>')
+      this.$addListTagsSelector.val('tag1\ntag2\ntag3')
+
+      // Validate List
+      this.$addListSelector.append(this.addListButtonElem)
+      this.$addListButtonSelector = $('#tumbTag-addListButton')
+      this.$addListButtonSelector.css(this.addListButtonElemCss)
+
+      this.bindValidateList()
+
+      this.$addListSelector.show('medium')
+    },
+
+    bindActions: function () {
+      var that = this
+
+      $('#tumbTag-actions .icon_edit_pencil').click(function () {
+        that.buildNewList()
+        return false
+      })
+    },
+
+    appendActions: function () {
+      this.$tumbTagSelector.append(this.actionsElem)
+      this.$actionsSelector = $('#tumbTag-actions')
+      this.$actionsSelector.css(this.actionsElemCss)
+
+      this.$actionsSelector.append(this.iconAddElem)
+      this.$iconAddSelector = $('.icon_edit_pencil')
+      this.$iconAddSelector.css(this.iconAddElemCss)
+
+      this.bindActions()
+    },
+
+    buildTumbTag: function () {
+      if (!this.$tumbTagSelector) {
+        $('body').append(this.tumbTagElem)
+
+        this.$tumbTagSelector = $('#tumbTag')
+        this.$tumbTagSelector.css(this.tumbTagElemCss)
+
+        this.adjustPosition()
+
+        this.appendActions()
+
+        this.appendTagLists()
+      }
+    },
+
+    showTumbTag: function () {
+      if (this.$tumbTagSelector && this.$tumbTagSelector.length && this.$tumbTagSelector.css('display') === 'none') {
+        this.adjustPosition()
+        // adjust position when the post's size change
+        $('.post-container').bind('DOMSubtreeModified', this.adjustPosition.bind(this))
+        return this.$tumbTagSelector.show()
+      }
+
+      this.buildTumbTag()
+      // adjust position when the post's size change
+      $('.post-container').bind('DOMSubtreeModified', this.adjustPosition.bind(this))
+    },
+
+    hideTumbTag: function () {
+      if (this.$tumbTagSelector && this.$tumbTagSelector.length) {
+        this.$tumbTagSelector.hide()
+      }
+    },
+
+    periodicallyCheckIfRender: function () {
+      var that = this
+
+      setTimeout(function () {
+        $('.post-form--tag-editor').length ? that.showTumbTag() : that.hideTumbTag()
+        that.periodicallyCheckIfRender()
+      }, 2000)
+    },
+
+    syncStorages: function () {
+      var deferred = Q.defer(),
+          tags     = JSON.parse(window.localStorage.tags)
+
+      chrome.storage.sync.set({ 'tags': tags })
+      chrome.storage.sync.get('tags', function (tags) {
+        window.localStorage.clear()
+        deferred.resolve(tags.tags)
+      })
+
+      return deferred.promise
+    },
+
+    storeTagExample: function () {
+      chrome.storage.sync.set({
+        tags: [
+          {
+            name : 'Example',
+            list : ['tag1', 'tag2', 'tag3']
+          }
+        ]
+      })
+    },
+
+    getSavedTags: function () {
+      var that     = this,
+          deferred = Q.defer()
+
+      chrome.storage.sync.get('tags', function (tags) {
+
+        if (tags && tags.tags && tags.tags.length) {
+          return deferred.resolve(tags.tags)
         }
-      }
-      this.hideAllExceptMe();
-      // We can use the Create View which more or less the same
-      this.clearListOfSelected();
-      this.tagsSelected = i < this.tags.length ? this.tags[i]: this.tags[0];
-      this.buildCreateView(i < this.tags.length ? this.tags[i]: this.tags[0]);
-      this.$createList.show();
-      return false;
-    },
 
-    // Building Choose List View
-    buildChooseView: function() {
-      if (this.$chooseList.length) {
-        this.$chooseList.parent().remove();
-      }
-      this.$tags.find('.options').after(this.getOptionsHtml('choose_list_view'));
-      this.$chooseList = $('#choose_list_view').find('.post_options');
-      for (var i = 0; i < this.tags.length; i += 1) {
-        this.addOption(this.$chooseList.find('ul'), this.getOptionHtml(this.tags[i].name, this.tags[i].selected));
-      }
-      this.$chooseList.find('li').click(this._chooseList.bind(this));
-      $('#choose_list_view .post_options').click(function() {
-        return false;
-      });
-    },
+        that.storeTagExample()
 
-    // Hide Views
-    hideAllExceptMe: function($selector) {
-      this.selectorsHideable.forEach(function(sel) {
-        // Why the parrent ? Because the $selector is the real content that we show/hide and that doesn't have an ID
-        if (!$selector || ($selector && $selector.currentTarget) || ($selector && $selector.parent().attr('id') !== $('#' + sel).attr('id'))) {
-          $('#' + sel).find('.post_options').hide();
-        }
-      });
-    },
+        chrome.storage.sync.get('tags', function (tags) {
+          return deferred.resolve(tags.tags)
+        })
+      })
+      return deferred.promise
+    }
+  }
 
-  };
-  tumbTag.init();
-});
+  tumbTag.init()
+})

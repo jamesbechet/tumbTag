@@ -7,7 +7,7 @@
 
 - Post your favorite tags in **one click**
 - Tags button fits with the **Tumblr's layout**
-- Create/Update/Delet lists of tags **saved in the browser** (chrome.storage)
+- Create/Delete lists of tags **saved in the browser** (chrome.storage)
 
 ## How it works ?
 
