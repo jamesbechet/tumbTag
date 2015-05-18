@@ -157,7 +157,7 @@ $(function() {
           postHeight = $('.post-container').height(),
           postWidth  = $('.post-container').width()
 
-      this.$tumbTagSelector.css('top', (postTop + postHeight).toString() + 'px')
+      this.$tumbTagSelector.css('top', (postTop + postHeight + 200).toString() + 'px')
       this.$tumbTagSelector.css('left', (postLeft + postWidth + 200).toString() + 'px')
     },
 
