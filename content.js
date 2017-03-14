@@ -68,7 +68,7 @@ $(function() {
     $tagListsSelector : null,
     tagListsElem      : '<ul id="tumbTag-tagLists"></ul>',
     tagListsElemCss   : {
-      'height'     : '250px',
+      'height'     : '500px',
       'overflow-y' : 'scroll'
     },
     listElem          : '<li class="tumbTag-list"></li>',
@@ -100,18 +100,24 @@ $(function() {
 
 
 
+    onClickPencilBound    : null,
+    onAdjustPositionBound : null,
+
+
     init : function () {
 
-      var that          = this,
-          getStoredTags = window.localStorage.tags
-            ? this.syncStorages.bind(this)
-            : this.getSavedTags.bind(this)
+      this.getSavedTags()
+        .then(this.onAfterInit.bind(this))
 
-      getStoredTags().
-        then(function (tags) {
-          that.tags = tags
-          that.periodicallyCheckIfRender()
-        })
+    },
+
+
+
+    onAfterInit : function (tags) {
+
+      this.tags = tags
+      this.save()
+      this.shouldRender()
 
     },
 
@@ -143,9 +149,8 @@ $(function() {
         return tagObj.name === $selector.parent().text()
       })
 
-      chrome.storage.sync.set({ 'tags' : this.tags })
-      $selector.parent().remove()
-      this.adjustPosition()
+      this.save()
+      this.render()
 
     },
 
@@ -202,6 +207,12 @@ $(function() {
 
 
 
+    onAdjustPosition : function () {
+      this.adjustPosition()
+    },
+
+
+
     adjustPosition : function () {
 
       var $postContainer = $('.post-container')
@@ -209,10 +220,11 @@ $(function() {
       var postLeft       = $postContainer.offset().left
       var postHeight     = $postContainer.height()
       var postWidth      = $postContainer.width()
+      var extraHeight    = this.isEditorVisible() ? 500 : 250
 
-      var finalTop = (postTop + postHeight + 250)
+      var finalTop = (postTop + postHeight + extraHeight)
       // It's a modal (a.k.a reblog), the page is not scrollable like usual
-      // therefore place the tumbTag element at a different posisition
+      // therefore place the tumbTag element at a different position
       if ($postContainer.parents('.post-forms-modal').length) {
         finalTop = (postTop + postHeight)
       }
@@ -297,7 +309,21 @@ $(function() {
 
 
     save : function () {
+
+      this.orderTags()
+
       chrome.storage.sync.set({ tags : this.tags })
+
+    },
+
+
+
+    orderTags : function () {
+
+      this.tags = _.sortBy(this.tags, function (tagObj) {
+        return tagObj.name.toLowerCase()
+      })
+
     },
 
 
@@ -336,10 +362,9 @@ $(function() {
       }
       else {
         this.addList(listName, tags)
-        this.appendNewList(_.last(this.tags))
       }
 
-      this.toggleAddList()
+      this.render()
 
       return false
 
@@ -439,17 +464,36 @@ $(function() {
 
 
 
-    bindActions : function () {
+    bind : function () {
 
-      var that = this
+      this.onClickPencilBound    = this.onClickPencil.bind(this)
+      this.onAdjustPositionBound = this.onAdjustPosition.bind(this)
 
-      $('#tumbTag-actions .icon_edit_pencil').click(function () {
-        that.toggleAddList()
-        return false
-      })
+      $('#tumbTag-actions .icon_edit_pencil').on('click', this.onClickPencilBound)
+      $('.post-container').on('DOMSubtreeModified', this.onAdjustPositionBound)
 
     },
 
+
+
+    unbind : function () {
+
+      $('#tumbTag-actions .icon_edit_pencil').off('click', this.onClickPencilBound)
+      $('.post-container').off('DOMSubtreeModified', this.onAdjustPositionBound)
+
+      this.onClickPencilBound    = null
+      this.onAdjustPositionBound = null
+
+    },
+
+
+
+    onClickPencil : function () {
+      
+      this.toggleAddList()
+      this.adjustPosition()
+
+    },
 
 
     appendActions : function () {
@@ -462,68 +506,69 @@ $(function() {
       this.$iconAddSelector = $('.icon_edit_pencil')
       this.$iconAddSelector.css(this.iconAddElemCss)
 
-      this.bindActions()
+      this.bind()
 
     },
 
 
 
-    buildTumbTag : function () {
+    render : function () {
 
-      if (!this.$tumbTagSelector) {
-        $('body').append(this.tumbTagElem)
-
-        this.$tumbTagSelector = $('#tumbTag')
-        this.$tumbTagSelector.css(this.tumbTagElemCss)
-
-        this.adjustPosition()
-
-        this.appendActions()
-
-        this.appendTagLists()
+      if (this.$tumbTagSelector) {
+        this.unmount()
       }
 
-    },
+      $('body').append(this.tumbTagElem)
 
+      this.$tumbTagSelector = $('#tumbTag')
+      this.$tumbTagSelector.css(this.tumbTagElemCss)
 
+      this.adjustPosition()
 
-    showTumbTag : function () {
+      this.appendActions()
 
-      if (this.$tumbTagSelector && this.$tumbTagSelector.length && this.$tumbTagSelector.css('display') === 'none') {
-
-        this.adjustPosition()
-        // adjust position when the post's size change
-        $('.post-container').bind('DOMSubtreeModified', this.adjustPosition.bind(this))
-        return this.$tumbTagSelector.show()
-
-      }
-
-      this.buildTumbTag()
-      // adjust position when the post's size change
-      $('.post-container').bind('DOMSubtreeModified', this.adjustPosition.bind(this))
+      this.appendTagLists()
 
     },
 
 
 
-    hideTumbTag : function () {
+    unmount : function () {
 
-      if (this.$tumbTagSelector && this.$tumbTagSelector.length) {
-        this.$tumbTagSelector.hide()
-      }
+      this.unbind()
+      
+      // Cleanup
+      // TODO more cleanup
+      this.$tumbTagSelector.remove()
+      this.$tumbTagSelector = null
+
+      this.$addListSelector.remove()
+      this.$addListSelector = null
 
     },
 
 
 
-    periodicallyCheckIfRender : function () {
+    shouldRender : function () {
 
       var that = this
 
       setTimeout(function () {
-        $('.post-form--tag-editor').length ? that.showTumbTag() : that.hideTumbTag()
-        that.periodicallyCheckIfRender()
-      }, 2000)
+
+        if ($('.post-form--tag-editor').length) {
+          
+          if (!that.$tumbTagSelector) {
+            that.render()
+          }
+
+        }
+        else {
+          that.unmount()
+        }
+
+        that.shouldRender()
+
+      }, 1000)
 
     },
 
