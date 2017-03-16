@@ -1,635 +1,940 @@
 $(function() {
 
-  var tumbTag = {
-
-    tags : [],
-
-    $tumbTagSelector : null,
-    tumbTagElem      : '<div id="tumbTag"></div>',
-    tumbTagElemCss   : {
-      'position'           : 'absolute',
-      'left'               : '1200px',
-      'top'                : '400px',
-      '-webkit-transform'  : 'translateX(-50%) translateY(-100%)',
-      'z-index'            : '1011',
-      'width'              : '200px',
-      'color'              : '#fff',
-      'margin-bottom'      : '1em',
-      '-webkit-transition' : 'top .3s ease-in-out'
-    },
-
-    $actionsSelector : null,
-    actionsElem      : '<div id="tumbTag-actions"></div>',
-    actionsElemCss   : {
-      'font-size'     : '1.5em',
-      'cursor'        : 'pointer',
-      'margin-bottom' : '.5em'
-    },
-
-    $iconAddSelector : null,
-    iconAddElem      : '<i class="icon_edit_pencil"></i>',
-    iconAddElemCss   : {
-      'font-size'   : '1.5em',
-      'line-height' : '1em'
-    },
-
-    $addListSelector : null,
-    addListElemCss   : {
-      'width'            : '200px',
-      'height'           : '250px',
-      'background-color' : '#fff',
-      'box-sizing'       : 'border-box',
-      'padding'          : '1em'
-    },
-
-    $addListNameSelector : null,
-    addListNameElem      : '<input id="tumbTag-addListName"></input>',
-    addListNameElemCss   : {
-      'width'         : '100%',
-      'margin-bottom' : '1em'
-    },
+  // The app
+  var $root
+  var ROOT_SELECTOR = '#tumbTag'
+  var ROOT_ELEM     = '<div id="tumbTag"></div>'
+  var ROOT_CSS      = {
+    'position'           : 'absolute',
+    'left'               : '1200px',
+    'top'                : '400px',
+    '-webkit-transform'  : 'translateX(-50%) translateY(-100%)',
+    'z-index'            : '1011',
+    'width'              : '200px',
+    'color'              : '#fff',
+    'margin-bottom'      : '1em',
+    '-webkit-transition' : 'top .3s ease-in-out'
+  }
+
+  // The actions container
+  var $actions
+  var ACTIONS_SELECTOR = '#tumbTag-actions'
+  var ACTIONS_ELEM     = '<div id="tumbTag-actions"></div>'
+  var ACTIONS_ELEM_CSS = {
+    'font-size'     : '1.5em',
+    'cursor'        : 'pointer',
+    'margin-bottom' : '.5em'
+  }
+
+  // The icon to create/edit the lists
+  var $addList
+  var ADD_EDIT_LIST_SELECTOR = '.tumbTag-iconPencil'
+  var ADD_EDIT_LIST_ELEM     = '<i class="tumbTag-iconPencil icon_edit_pencil"></i>'
+  var ADD_EDIT_LIST_ELEM_CSS = {
+    'font-size'   : '1.5em',
+    'line-height' : '1em'
+  }
+
+  // The editor container
+  var $editor
+  var EDITOR_SELECTOR = '#tumbTag-editor'
+  var EDITOR_ELEM     = '<div id="tumbTag-editor"></div>'
+  var EDITOR_CSS      = {
+    'width'            : '200px',
+    'height'           : '250px',
+    'background-color' : '#fff',
+    'box-sizing'       : 'border-box',
+    'padding'          : '1em'
+  }
+
+  // The input to edit the list name
+  var $editorListName
+  var EDITOR_LIST_NAME_SELECTOR = '#tumbTag-addListName'
+  var EDITOR_LIST_NAME_ELEM     = '<input id="tumbTag-addListName"></input>'
+  var EDITOR_LIST_NAME_CSS      = {
+    'width'         : '100%',
+    'margin-bottom' : '1em'
+  }
+
+  // The textarea to edit the list content
+  var $editorListContent
+  var EDITOR_LIST_CONTENT_SELECTOR = '#tumbTag-addListTags'
+  var EDITOR_LIST_CONTENT_ELEM     = '<textarea id="tumbTag-addListTags"></textarea>'
+  var EDITOR_LIST_CONTENT_CSS      = {
+    'width'  : '100%',
+    'height' : '100px'
+  }
+
+  // The button to create/edit the list
+  var $editorButton
+  var EDITOR_BUTTON_SELECTOR = '#tumbTag-addListButton'
+  var EDITOR_BUTTON_ELEM     = '<button id="tumbTag-addListButton">Done</button>'
+  var EDITOR_BUTTON_CSS      = {
+    'padding'          : '.2em 1em',
+    'display'          : 'block',
+    'margin'           : '0 auto',
+    'background-color' : '#529ecc'
+  }
+
+  // The lists
+  var $lists
+  var LISTS_SELECTOR = '#tumbTag-lists'
+  var LISTS_ELEM     = '<ul id="tumbTag-lists"></ul>'
+  var LISTS_CSS      = {
+    'height'     : '500px',
+    'overflow-y' : 'scroll'
+  }
+
+  // A list 
+  var LIST_SELECTOR = '.tumbTag-list'
+  var LIST_ELEM     = '<li class="tumbTag-list"></li>'
+  var LIST_CSS      = {
+    'cursor'           : 'pointer',
+    'padding'          : '10px',
+    'background-color' : 'rgba(0, 0, 0, 0.07)',
+    'margin-bottom'    : '1em'
+  }
+
+  // The icon to delete a list
+  var DELETE_LIST_SELECTOR = '.tumbTag-iconClose'
+  var DELETE_LIST_ELEM     = '<i class="tumbTag-iconClose icon_close"></i>'
+  var DELETE_LIST_CSS      = {
+    'float'        : 'right',
+    'margin-right' : '.4em',
+    'font-size'    : '1.3em',
+    'line-height'  : '1em'
+  }
 
-    $addListTagsSelector : null,
-    addListTagsElem      : '<textarea id="tumbTag-addListTags"></textarea>',
-    addListTagsElemCss   : {
-      'width'  : '100%',
-      'height' : '100px'
-    },
+  // Other Selectors
+  var POST_CONTAINER_SELECTOR                    = '.post-container'
+  var POST_CONTAINER_TAGS_SELECTOR               = '.post-form--tag-editor'
+  var POST_CONTAINER_TAGS_INPUT_SELECTOR         = '.tag-input-wrapper .editor-plaintext'
+  var POST_CONTAINER_TAGS_INPUT_WRAPPER_SELECTOR = '.tag-input-wrapper .editor-placeholder'
 
-    $addListButtonSelector : null,
-    addListButtonElem      : '<button id="tumbTag-addListButton">Done</button>',
-    addListButtonElemCss   : {
-      'padding'          : '.2em 1em',
-      'display'          : 'block',
-      'margin'           : '0 auto',
-      'background-color' : '#529ecc'
-    },
+  // Events
+  var EVENT = {
+    DOM_SUBTREE_MODIFIED : 'DOMSubtreeModified',
+    CLICK                : 'click',
+    FOCUS                : 'focus',
+    BLUR                 : 'blur',
+  }
 
-    $tagListsSelector : null,
-    tagListsElem      : '<ul id="tumbTag-tagLists"></ul>',
-    tagListsElemCss   : {
-      'height'     : '500px',
-      'overflow-y' : 'scroll'
-    },
-    listElem          : '<li class="tumbTag-list"></li>',
-    listElemCss       : {
-      'cursor'           : 'pointer',
-      'padding'          : '10px',
-      'background-color' : 'rgba(0, 0, 0, 0.07)',
-      'margin-bottom'    : '1em'
-    },
 
-    $iconRemoveSelector : null,
-    iconRemoveElem      : '<i class="icon_close"></i>',
-    iconRemoveElemCss   : {
-      'float'        : 'right',
-      'margin-right' : '.4em',
-      'font-size'    : '1.3em',
-      'line-height'  : '1em'
-    },
 
+  /**
+   * The list's name being edited.
+   * @type {String}
+   */
+  var editingList
 
+  /**
+   * Contains the tags.
+   * It gets saved in the `chrome.storage`.
+   * @type {Object}
+   */
+  var store
 
-    /**
-     * The list being edited.
-     * @type {Object}
-     *       {String} name
-     *       {Array} list
-     */
-    editingList : null,
+  /**
+   * Whether or not the app is in debug mode.
+   * TODO
+   * @type {Boolean}
+   */
+  var isDebugging
 
 
 
-    onClickPencilBound    : null,
-    onAdjustPositionBound : null,
 
 
-    init : function () {
 
-      this.getSavedTags()
-        .then(this.onAfterInit.bind(this))
+  //////////
+  // INIT //
+  //////////
 
-    },
 
 
+  /**
+   * Inits the app.
+   */
+  function init() {
 
-    onAfterInit : function (tags) {
+    debug('init')
 
-      this.tags = tags
-      this.save()
-      this.shouldRender()
+    // Get the store
+    initStore()
 
-    },
+    // Init the debug flags
+    initDebug()
 
+  }
 
 
-    appendTags : function ($selector) {
 
-      var $shouldAppendTo = $('.tag-input-wrapper .editor-plaintext'),
-          tagObj          = this.tags[$selector.index()]
+  /**
+   * Gets the stored data.
+   */
+  function initStore() {
+    debug('initStore')
+    get(onAfterGetStore)
+  }
 
 
-      _.each(tagObj.list, function (tag) {
-        $shouldAppendTo.append('<span>' + tag + '</span>')
-        $shouldAppendTo.trigger('focus')
-        $shouldAppendTo.trigger('blur')
-      })
 
-      setTimeout(function () {
-        $('.tag-input-wrapper .editor-placeholder').text('')
-      }, 0)
+  /**
+   * Gets the stored data.
+   * If there is no data stored, create an example
+   * and set it in the storage.
+   * 
+   * @param  {Object} storage 
+   */
+  function onAfterGetStore(storage) {
 
-    },
+    debug('onAfterGetStore: storage %o', storage)
 
+    // If there are tags store, return them
+    if (storage && storage.tags && storage.tags.length) {
+      store = storage
+    }
+    // If there are no tags stored, set the example
+    else {
+      setExample()
+    }
 
+    shouldRender()
 
-    removeList : function ($selector) {
+  }
 
-      this.tags = _.reject(this.tags, function (tagObj) {
-        return tagObj.name === $selector.parent().text()
-      })
 
-      this.save()
-      this.render()
 
-    },
+  /**
+   * Sets the example in the storage.
+   */
+  function setExample() {
 
+    debug('setExample')
 
+    store = {
+      tags : [{
+        name : 'Example',
+        list : ['tag1', 'tag2', 'tag3']
+      }]
+    }
 
-    bindNewTagListsEvent : function () {
-      $('.tumbTag-list').last().click(this.onClickTagList.bind(this))
-      $('.icon_close').last().click(this.onClickRemoveList.bind(this))
-    },
+    set()
 
+  }
 
 
-    bindTagListsEvent : function () {
-      $('.tumbTag-list').click(this.onClickTagList.bind(this))
-      $('.icon_close').click(this.onClickRemoveList.bind(this))
-    },
 
+  /**
+   * Inits the debug flag.
+   */
+  function initDebug() {
 
+    // TODO handle `isDebugging` flag
+    isDebugging = true
 
-    onClickTagList : function (event) {
+    console.group('TumbTag')
 
-      // If the add list selector is open, edit the list
-      if (this.isEditorVisible()) {
-        this.editTagList($(event.currentTarget))
-      }
-      //  If the add list selector is closed, append the tags
-      else {
-        this.appendTags($(event.currentTarget))
-      }
+  }
 
-      return false
 
-    },
 
 
 
-    editTagList : function ($selector) {
+  ////////////
+  // RENDER //
+  ////////////
 
-      // Get the list being edited
-      var tagList      = this.tags[$selector.index()]
-      this.editingList = tagList
 
-      // Render the list
-      this.renderEditor()
 
-    },
+  /**
+   * Renders the app.
+   */
+  function render() {
 
+    debug('render: store %o', store)
 
+    if ($root) {
+      unmount()
+    }
 
-    onClickRemoveList : function (event) {
-      this.removeList($(event.currentTarget))
-      return false
-    },
+    $('body').append(ROOT_ELEM)
 
+    $root = $(ROOT_SELECTOR)
+    $root.css(ROOT_CSS)
 
+    renderActions()
 
-    onAdjustPosition : function () {
-      this.adjustPosition()
-    },
+    renderLists()
 
+    renderEditor()
 
+    adjustPosition()
 
-    adjustPosition : function () {
+    // Bind the events
+    bind()
 
-      var $postContainer = $('.post-container')
-      var postTop        = $postContainer.offset().top
-      var postLeft       = $postContainer.offset().left
-      var postHeight     = $postContainer.height()
-      var postWidth      = $postContainer.width()
-      var extraHeight    = this.isEditorVisible() ? 500 : 250
+  }
 
-      var finalTop = (postTop + postHeight + extraHeight)
-      // It's a modal (a.k.a reblog), the page is not scrollable like usual
-      // therefore place the tumbTag element at a different position
-      if ($postContainer.parents('.post-forms-modal').length) {
-        finalTop = (postTop + postHeight)
-      }
-      this.$tumbTagSelector.css('top', finalTop.toString() + 'px')
-      this.$tumbTagSelector.css('left', (postLeft + postWidth + 200).toString() + 'px')
 
-    },
 
+  /**
+   * Renders the actions.
+   */
+  function renderActions() {
+     
+    debug('renderActions')
 
+    // Append the actions container
+    $root.append(ACTIONS_ELEM)
+    $actions = $(ACTIONS_SELECTOR)
+    $actions.css(ACTIONS_ELEM_CSS)
 
-    appendTagLists : function () {
+    // Append the add/edit button
+    $actions.append(ADD_EDIT_LIST_ELEM)
+    $addList = $(ADD_EDIT_LIST_SELECTOR)
+    $addList.css(ADD_EDIT_LIST_ELEM_CSS)
 
-      var that = this
+  }
 
-      this.$tumbTagSelector.append(this.tagListsElem)
-      this.$tagListsSelector = $('#tumbTag-tagLists')
-      this.$tagListsSelector.css(this.tagListsElemCss)
 
-      _.each(this.tags, function (tagObj) {
-        that.$tagListsSelector.append('<li class="tumbTag-list">' + tagObj.name + that.iconRemoveElem + '</li>')
-      })
 
-      $('.tumbTag-list').css(this.listElemCss)
-      $('.icon_close').css(this.iconRemoveElemCss)
-      this.bindTagListsEvent()
+  /**
+   * Renders the lists.
+   */
+  function renderLists() {
 
-    },
+    debug('renderLists')
 
+    // Append the lists container
+    $root.append(LISTS_ELEM)
 
+    // Append the lists
+    $lists = $(LISTS_SELECTOR)
+    store.tags.forEach(function (tagObj) {
+      $lists.append('<li class="' + LIST_SELECTOR.slice(1) + '">' + tagObj.name + DELETE_LIST_ELEM + '</li>')
+    })
 
-    setListName : function (listName) {
+    $lists.css(LISTS_CSS)
+    $(LIST_SELECTOR).css(LIST_CSS)
+    $(DELETE_LIST_SELECTOR).css(DELETE_LIST_CSS)
 
-      if (this.editingList) {
-        return listName
-      }
+  }
 
-      var tags         = this.tags,
-          loop         = 5,
-          existingName = listName
 
-      existingName = _.find(tags, function (tagObj) {
-        return tagObj.name === listName
-      })
 
-      while (existingName && loop) {
-        listName     = listName + '1'
-        existingName = _.find(tags, function (tagObj) {
-          return tagObj.name === listName
-        })
-        loop--
-      }
+  /**
+   * Creates the editor.
+   */
+  function renderEditor() {
 
-      return listName
+    debug('renderEditor')
 
-    },
+    // Create the editor
+    $editor = $(EDITOR_ELEM)
+    $editor.hide()
+    
+    // Container
+    $addList.after($editor)
+    $editor.css(EDITOR_CSS)
 
+    // List name
+    $editor.append(EDITOR_LIST_NAME_ELEM)
+    $editorListName = $(EDITOR_LIST_NAME_SELECTOR)
+    $editorListName.css(EDITOR_LIST_NAME_CSS)
+    $editorListName.before('<p style="font-size:13px;font-weight:700px;color:#444">List name</p>')
 
+    // List tags
+    $editor.append(EDITOR_LIST_CONTENT_ELEM)
+    $editorListContent = $(EDITOR_LIST_CONTENT_SELECTOR)
+    $editorListContent.css(EDITOR_LIST_CONTENT_CSS)
+    $editorListContent.before('<p style="font-size:13px;font-weight:700px;color:#444">List tags</p>')
 
-    addList : function (name, list) {
+    // Validate List
+    $editor.append(EDITOR_BUTTON_ELEM)
+    $editorButton = $(EDITOR_BUTTON_SELECTOR)
+    $editorButton.css(EDITOR_BUTTON_CSS)
 
-      this.tags.push({
-        name : name,
-        list : list
-      })
+  }
 
-      this.save()
 
-    },
 
 
+  /**
+   * Renders the editor.
+   */
+  function fillEditor() {
 
-    editList : function (name, list) {
+    debug('fillEditor')
 
-      // NOTE: Mutation is bad
-      this.editingList.name = name
-      this.editingList.list = list
+    // Get the list data
+    var name
+    var list
+    if (editingList) {
+      name = editingList
+      list = findList(editingList).list
+      $editorButton.text('Edit')
+    }
+    else {
+      name = 'Blogging'
+      list = ['tag1', 'tag2', 'tag3']
+      $editorButton.text('Done')
+    }
 
-      this.save()
+    $editorListName.val(name)
+    $editorListContent.val(list.join('\n'))
 
-    },
+  }
 
 
 
-    save : function () {
 
-      this.orderTags()
+  /**
+   * Unbinds the events  and remove all the elements from the dom.
+   */
+  function unmount() {
 
-      chrome.storage.sync.set({ tags : this.tags })
+    debug('unmount')
 
-    },
+    // Unbind the events
+    unbind()
+    
+    // Cleanup
+    $addList.remove()
+    $actions.remove()
+    $editor.remove()
+    $editorListName.remove()
+    $editorListContent.remove()
+    $editorButton.remove()
+    $root.remove()
 
+    $addList = null
+    $actions = null
+    $editor = null
+    $editorListName = null
+    $editorListContent = null
+    $editorButton = null
+    $root = null
 
+  }
 
-    orderTags : function () {
 
-      this.tags = _.sortBy(this.tags, function (tagObj) {
-        return tagObj.name.toLowerCase()
-      })
 
-    },
+  /**
+   * Periodically check if `tumbTag` should be rendered.
+   */
+  function shouldRender() {
 
+    setTimeout(function () {
 
-
-    appendNewList : function (newList) {
-
-      this.$addListSelector.hide('medium')
-      this.$tagListsSelector
-        .append('<li class="tumbTag-list">' + newList.name + this.iconRemoveElem + '</li>')
-
-      $('.tumbTag-list').css(this.listElemCss)
-      $('.icon_close').css(this.iconRemoveElemCss)
-      this.bindNewTagListsEvent()
-
-      this.adjustPosition()
-
-    },
-
-
-
-    bindValidateList : function () {
-      this.$addListButtonSelector.click(this.onClickAddListButton.bind(this))
-    },
-
-
-
-    onClickAddListButton : function () {
-
-      let listName = this.setListName(this.$addListNameSelector.val())
-      let tags     = this.$addListTagsSelector.val().replace(/\r\n/g, '\n').split('\n')
-      tags         = _.filter(tags, function (tag) { return !!tag })
-
-      if (this.editingList) {
-        this.editList(listName, tags)
-        this.editingList = null
-      }
-      else {
-        this.addList(listName, tags)
-      }
-
-      this.render()
-
-      return false
-
-    },
-
-
-
-    toggleAddList : function () {
-
-      // If the editor is visible, hide it
-      if (this.isEditorVisible()) {
-        this.hideEditor()
-        return
-      }
-
-      // If the editor doesn't exist, create it
-      if (!this.$addListSelector) {
-        this.createEditor()
-      }
-
-      // If the editor is hidden, show it
-      this.renderEditor()
-      this.showEditor()
-
-    },
-
-
-
-    hideEditor() {
-      this.$addListSelector.hide('medium')
-    },
-
-
-    showEditor() {
-      this.$addListSelector.show('medium')
-    },
-
-
-    createEditor() {
-
-      this.$addListSelector = $('<div id="tumbTag-addList"></div>')
-      this.$addListSelector.hide()
-      
-      // Container
-      this.$iconAddSelector.after(this.$addListSelector)
-      this.$addListSelector.css(this.addListElemCss)
-
-      // List name
-      this.$addListSelector.append(this.addListNameElem)
-      this.$addListNameSelector = $('#tumbTag-addListName')
-      this.$addListNameSelector.css(this.addListNameElemCss)
-      this.$addListNameSelector.before('<p style="font-size:13px;font-weight:700px;color:#444">List name</p>')
-
-      // List tags
-      this.$addListSelector.append(this.addListTagsElem)
-      this.$addListTagsSelector = $('#tumbTag-addListTags')
-      this.$addListTagsSelector.css(this.addListTagsElemCss)
-      this.$addListTagsSelector.before('<p style="font-size:13px;font-weight:700px;color:#444">List tags</p>')
-
-      // Validate List
-      this.$addListSelector.append(this.addListButtonElem)
-      this.$addListButtonSelector = $('#tumbTag-addListButton')
-      this.$addListButtonSelector.css(this.addListButtonElemCss)
-
-      this.bindValidateList()
-
-    },
-
-
-
-    isEditorVisible() {
-      return this.$addListSelector && this.$addListSelector.css('display') === 'block'
-    },
-
-
-
-    renderEditor() {
-
-      // Get the list data
-      var name
-      var list
-      if (this.editingList) {
-        name = this.editingList.name
-        list = this.editingList.list
-        this.$addListButtonSelector.text('Edit')
-      }
-      else {
-        name = 'Blogging'
-        list = ['tag1', 'tag2', 'tag3']
-        this.$addListButtonSelector.text('Done')
-      }
-
-      this.$addListNameSelector.val(name)
-      this.$addListTagsSelector.val(list.join('\n'))
-
-    },
-
-
-
-    bind : function () {
-
-      this.onClickPencilBound    = this.onClickPencil.bind(this)
-      this.onAdjustPositionBound = this.onAdjustPosition.bind(this)
-
-      $('#tumbTag-actions .icon_edit_pencil').on('click', this.onClickPencilBound)
-      $('.post-container').on('DOMSubtreeModified', this.onAdjustPositionBound)
-
-    },
-
-
-
-    unbind : function () {
-
-      $('#tumbTag-actions .icon_edit_pencil').off('click', this.onClickPencilBound)
-      $('.post-container').off('DOMSubtreeModified', this.onAdjustPositionBound)
-
-      this.onClickPencilBound    = null
-      this.onAdjustPositionBound = null
-
-    },
-
-
-
-    onClickPencil : function () {
-      
-      this.toggleAddList()
-      this.adjustPosition()
-
-    },
-
-
-    appendActions : function () {
-
-      this.$tumbTagSelector.append(this.actionsElem)
-      this.$actionsSelector = $('#tumbTag-actions')
-      this.$actionsSelector.css(this.actionsElemCss)
-
-      this.$actionsSelector.append(this.iconAddElem)
-      this.$iconAddSelector = $('.icon_edit_pencil')
-      this.$iconAddSelector.css(this.iconAddElemCss)
-
-      this.bind()
-
-    },
-
-
-
-    render : function () {
-
-      if (this.$tumbTagSelector) {
-        this.unmount()
-      }
-
-      $('body').append(this.tumbTagElem)
-
-      this.$tumbTagSelector = $('#tumbTag')
-      this.$tumbTagSelector.css(this.tumbTagElemCss)
-
-      this.adjustPosition()
-
-      this.appendActions()
-
-      this.appendTagLists()
-
-    },
-
-
-
-    unmount : function () {
-
-      this.unbind()
-      
-      // Cleanup
-      // TODO more cleanup
-      this.$tumbTagSelector.remove()
-      this.$tumbTagSelector = null
-
-      this.$addListSelector.remove()
-      this.$addListSelector = null
-
-    },
-
-
-
-    shouldRender : function () {
-
-      var that = this
-
-      setTimeout(function () {
-
-        if ($('.post-form--tag-editor').length) {
-          
-          if (!that.$tumbTagSelector) {
-            that.render()
-          }
-
-        }
-        else {
-          that.unmount()
+      if ($(POST_CONTAINER_TAGS_SELECTOR).length) {
+        
+        if (!$root) {
+          render()
         }
 
-        that.shouldRender()
+      }
+      else if ($root) {
+        unmount()
+      }
 
-      }, 1000)
+      shouldRender()
 
-    },
+    }, 2000)
 
-
-
-    syncStorages : function () {
-
-      var deferred = Q.defer(),
-          tags     = JSON.parse(window.localStorage.tags)
-
-      chrome.storage.sync.set({ 'tags': tags })
-      chrome.storage.sync.get('tags', function (tags) {
-        window.localStorage.clear()
-        deferred.resolve(tags.tags)
-      })
-
-      return deferred.promise
-
-    },
+  }
 
 
 
-    setTagExample : function () {
 
-      this.tags = [
-        {
-          name : 'Example',
-          list : ['tag1', 'tag2', 'tag3']
-        }
-      ]
 
-      this.save()
-
-    },
+  /////////////
+  // ACTIONS //
+  /////////////
 
 
 
-    getSavedTags : function () {
 
-      var that     = this,
-          deferred = Q.defer()
+  /**
+   * Sets the store in the `chrome.storage`.
+   */
+  function set() {
 
-      chrome.storage.sync.get('tags', function (tags) {
+    sort()
 
-        if (tags && tags.tags && tags.tags.length) {
-          return deferred.resolve(tags.tags)
-        }
+    debug('set: store %o', store)
+    chrome.storage.sync.set(store)
 
-        that.setTagExample()
+  }
 
-        chrome.storage.sync.get('tags', function (tags) {
-          return deferred.resolve(tags.tags)
-        })
-      })
-      return deferred.promise
+
+
+  /**
+   * Gets the `chrome.storage`
+   * @param  {Function} callback 
+   */
+  function get(callback) {
+    chrome.storage.sync.get('tags', callback)
+  }
+
+
+
+  /**
+   * Adds the list to the store.
+   * @param {String} name 
+   * @param {String[]} list 
+   */
+  function addList(name, list) {
+
+    debug('addList: name %o, list %o', name, list)
+
+    store = {
+      tags : store.tags.concat([{ name : name, list : list }])
     }
 
   }
 
 
 
-  tumbTag.init()
+  /**
+   * Edits the list with the given name.
+   * @param  {String} name 
+   * @param  {String[]} list 
+   */
+  function editList(name, list) {
+
+    debug('editList: name %o, list %o', name, list)
+
+    // Remove the old list
+    store.tags = store.tags.filter(function (obj) {
+      return obj.name !== editingList
+    })
+
+    // Add the new list
+    addList(name, list)
+
+  }
+
+
+
+
+
+
+
+  ////////////
+  // EVENTS //
+  ////////////
+
+
+
+  /**
+   * Binds events on the element created.
+   */
+  function bind() {
+
+    debug('bind') 
+
+    // Tumblr
+    $(POST_CONTAINER_SELECTOR).on(EVENT.DOM_SUBTREE_MODIFIED, onDOMSubtreeModified)
+
+    // Add/edit list
+    $(ADD_EDIT_LIST_SELECTOR).on(EVENT.CLICK, onClickPencil)
+
+    // List
+    $(LIST_SELECTOR).on(EVENT.CLICK, onClickList)
+    $(DELETE_LIST_SELECTOR).on(EVENT.CLICK, onClickDeleteList)
+
+    // Editor
+    $editorButton.on(EVENT.CLICK, onClickEditorButton)
+
+  }
+
+
+
+  /**
+   * Unbinds evens on the element created.
+   */
+  function unbind() {
+
+    debug('unbind') 
+
+    // Tumblr
+    $(POST_CONTAINER_SELECTOR).off(EVENT.DOM_SUBTREE_MODIFIED, onDOMSubtreeModified)
+
+    // Add/edit list
+    $(ADD_EDIT_LIST_SELECTOR).off(EVENT.CLICK, onClickPencil)
+
+    // List
+    $(LIST_SELECTOR).on(EVENT.CLICK, onClickList)
+    $(DELETE_LIST_SELECTOR).on(EVENT.CLICK, onClickDeleteList)
+
+    // Editor
+    if ($editorButton) {
+      $editorButton.off(EVENT.CLICK, onClickEditorButton)
+    }
+
+  }
+
+
+
+
+  ////////////////////
+  // EVENT HANDLERS //
+  ////////////////////
+
+
+
+
+  /**
+   * Callback triggered when a list is clicked.
+   * @param  {Event} event 
+   * @return {Boolean}      
+   */
+  function onClickList(event) {
+
+    debug('onClickList: event ', event)
+
+    // If the add list selector is open, edit the list
+    let index = $(event.currentTarget).index()
+    if (isEditorVisible()) {
+      editTagList(index)
+    }
+    //  If the add list selector is closed, append the tags
+    else {
+      appendTagsToPost(index)
+    }
+
+    return false
+
+  }
+
+
+
+  /**
+   * Sets the `editingList` and renders the editor.
+   * @param  {Number} index
+   */
+  function editTagList(index) {
+
+    debug('editTagList: index', index)
+
+    // Get the list being edited
+    var list    = store.tags[index]
+    editingList = list.name
+
+    // Render the list
+    fillEditor()
+
+  }
+
+
+
+  /**
+   * Delete the list.
+   * @param  {String} name 
+   */
+  function deleteList(name) {
+
+    debug('deleteList: name ', name)
+
+    // Delete the list that match the givne name
+    store.tags = store.tags.filter(function (obj) {
+      return obj.name !== name
+    })
+
+    // Set the list to the storage
+    set()
+
+    // Re-render
+    render()
+
+  }
+
+
+
+
+
+  /**
+   * Callback triggered when the delete list icon is clicked.
+   * @param  {Event} event 
+   * @return {Boolean}      
+   */
+  function onClickDeleteList(event) {
+
+    debug('onClickDeleteList: event', event)
+
+    deleteList($(event.currentTarget).parent().text())
+    return false
+
+  }
+
+
+
+  /**
+   * Callback triggerd when the post container's subtree is modified.
+   * It adjusts the position of the `tumbTag` element.
+   */
+  function onDOMSubtreeModified() {
+    adjustPosition()
+  }
+
+
+
+
+  /**
+   * Callback triggered when the pencil is clicked.
+   * It shows/hide the editor.
+   */
+  function onClickPencil() {
+    toggleEditor()
+    adjustPosition()
+  }
+
+
+
+
+  /**
+   * Callback triggered when the editor button is clicked.
+   * It add/edit the list and set it to the storage.
+   * @return {Boolean} 
+   */
+  function onClickEditorButton() {
+
+    let listName = getUniqueListName($editorListName.val())
+    let tags     = $editorListContent.val().replace(/\r\n/g, '\n').split('\n')
+    tags         = tags.filter(function (tag) { return !!tag })
+
+    if (editingList) {
+      editList(listName, tags)
+      editingList = null
+    }
+    else {
+      addList(listName, tags)
+    }
+
+    set()
+    render()
+
+    return false
+
+  }
+
+
+
+
+
+  ///////////////////////
+  // DOM MANIPULATIONS //
+  ///////////////////////
+
+
+
+  /**
+   * Appends the tags to the post.
+   * @param  {Number} index 
+   */
+  function appendTagsToPost(index) {
+
+    debug('appendTagsToPost: index ', index)
+
+    // Get the list
+    var obj = store.tags[index]
+
+    // Append the tags
+    var $tagInput = $(POST_CONTAINER_TAGS_INPUT_SELECTOR)
+    obj.list.forEach(function (tag) {
+      $tagInput.append('<span>' + tag + '</span>')
+      $tagInput.trigger(EVENT.FOCUS)
+      $tagInput.trigger(EVENT.BLUR)
+    })
+
+    // HACK, validate the tags input
+    setTimeout(function () {
+      $(POST_CONTAINER_TAGS_INPUT_WRAPPER_SELECTOR).text('')
+    }, 0)
+
+  }
+
+
+
+  /**
+   * Adjusts the position of the `tumbTag` element.
+   */
+  function adjustPosition() {
+
+    var $postContainer = $('.post-container')
+    var postTop        = $postContainer.offset().top
+    var postLeft       = $postContainer.offset().left
+    var postHeight     = $postContainer.height()
+    var postWidth      = $postContainer.width()
+    var extraHeight    = isEditorVisible() ? 500 : 250
+
+    var finalTop = (postTop + postHeight + extraHeight)
+    // It's a modal (a.k.a reblog), the page is not scrollable like usual
+    // therefore place the tumbTag element at a different position
+    if ($postContainer.parents('.post-forms-modal').length) {
+      finalTop = (postTop + postHeight)
+    }
+    $root.css('top', finalTop.toString() + 'px')
+    $root.css('left', (postLeft + postWidth + 200).toString() + 'px')
+
+  }
+
+
+
+  /**
+   * Toggles the editor, creates it if necessary.
+   */
+  function toggleEditor() {
+
+    // If the editor is visible, hide it
+    if (isEditorVisible()) {
+      hideEditor()
+      return
+    }
+
+    // If the editor doesn't exist, create it
+    if (!$editor) {
+      renderEditor()
+    }
+
+    // If the editor is hidden, show it
+    fillEditor()
+    showEditor()
+
+  }
+
+
+  /**
+   * Hides the editor.
+   */
+  function hideEditor() {
+    $editor.hide('medium')
+  }
+
+
+
+  /**
+   * Shows the editor.
+   */
+  function showEditor() {
+    $editor.show('medium')
+  }
+
+
+
+  /**
+   * Checks whether or not the editor is visible.
+   * @return {Boolean} 
+   */
+  function isEditorVisible() {
+    return $editor && $editor.css('display') === 'block'
+  }
+
+
+
+
+  /////////////
+  // GETTERS //
+  /////////////
+
+
+
+  /**
+   * Gets an unique list name.
+   * @param {String} listName
+   */
+  function getUniqueListName(listName) {
+
+    debug('getUniqueListName: listName %o, editingList %o', listName, editingList)
+
+    // The list is being edited, noop
+    if (editingList) {
+      return listName
+    }
+
+    var tags         = store.tags
+    var loop         = 5
+    var existingName = listName
+
+    existingName = findList(listName)
+
+    while (existingName && loop) {
+      listName     = listName + '1'
+      existingName = findList(listName)
+      loop--
+    }
+
+    return listName
+
+  }
+
+
+
+
+  ///////////
+  // UTILS //
+  ///////////
+
+
+
+  /**
+   * Logs the `arguments` if the `isDebugging` flag is on.
+   */
+  function debug() {
+
+    // If it's not in debug mode, noop
+    if (!isDebugging) {
+      return
+    }
+
+    // If it's debug mode, log it
+    console.log.apply(null, arguments)
+
+  }
+
+
+
+
+  /**
+   * Sorts the `store.tags` by alphabetical order.
+   */
+  function sort() {
+
+    debug('sort: %o', store)
+
+    store.tags = store.tags.sort(function (tagObj) {
+      return tagObj.name.toLowerCase()
+    })
+
+  }
+
+
+
+  /**
+   * Finds the list with the given `name`.
+   * @param  {String} name 
+   * @return {Object}      
+   */
+  function findList(name) {
+
+    debug('findList: %o', name)
+    return store.tags.find(function (obj) {
+      return obj.name === name
+    })
+  }
+
+
+
+
+
+
+  ///////////
+  // ENTRY //
+  ///////////
+
+
+  // Init
+  init()
 
 })

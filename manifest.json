@@ -4,7 +4,7 @@
   "name": "Tumblr Post Tags",
   "short_name": "tumbtag",
   "description": "Post your list of favorite tags on Tumblr in one click.",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "icons": { "16": "icons/16x16.png", "48": "icons/48x48.png", "128": "icons/128x128.png" },
   "permissions": [
     "storage"
@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "matches": [ "http://www.tumblr.com/*", "https://www.tumblr.com/*" ],
-      "js": ["jquery-1.9.0.js", "q.js", "underscore.js", "content.js"]
+      "js": ["jquery-3.1.1.min.js", "content.js"]
     }
   ]
 }
