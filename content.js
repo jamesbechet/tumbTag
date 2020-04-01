@@ -1,8 +1,8 @@
 $(function () {
   // The app
   var $root
-  var ROOT_SELECTOR = '#tumbTag'
-  var ROOT_ELEM = '<div id="tumbTag"></div>'
+  var ROOT_SELECTOR = '#tumblrTag'
+  var ROOT_ELEM = '<div id="tumblrTag"></div>'
   var ROOT_CSS = {
     'position': 'absolute',
     'left': '1200px',
@@ -17,29 +17,35 @@ $(function () {
 
   // The actions container
   var $actions
-  var ACTIONS_SELECTOR = '#tumbTag-actions'
-  var ACTIONS_ELEM = '<div id="tumbTag-actions"></div>'
+  var ACTIONS_SELECTOR = '#tumblrTag-actions'
+  var ACTIONS_ELEM = '<div id="tumblrTag-actions"></div>'
   var ACTIONS_ELEM_CSS = {
     'font-size': '1.5em',
     'cursor': 'pointer',
     'margin-bottom': '.5em'
   }
 
-  // The icon to create/edit the lists
-  var $addList
-  var ADD_EDIT_LIST_SELECTOR = '.tumbTag-iconPencil'
-  var ADD_EDIT_LIST_ELEM = '<i class="tumbTag-iconPencil icon_edit_pencil"></i>'
-  var ADD_EDIT_LIST_ELEM_CSS = {
-    'font-size': '1.5em',
-    'line-height': '1em'
+  // The icon to create the lists
+  var $createList
+  var CREATE_LIST_SELECTOR = '#tumblrTag-createListButton'
+  var CREATE_LIST_BUTTON_ELEM = '<button id="tumblrTag-createListButton">Create</button>'
+  var CREATE_LIST_BUTTON_CSS = {
+    'border-radius': '2px',
+    'background-color': '#00b8ff',
+    'padding': '0.3em 0.6em',
+    'font-size': '.8em',
+    'font-weight': '600',
+    'margin-bottom': '0.5em',
+    'display': 'block'
   }
 
   // The editor container
   var $editor
-  var EDITOR_ELEM = '<div id="tumbTag-editor"></div>'
+  var EDITOR_ELEM = '<div id="tumblrTag-editor"></div>'
+  var EDITOR_HEIGHT = 250
   var EDITOR_CSS = {
     'width': '200px',
-    'height': '250px',
+    'height': EDITOR_HEIGHT + 'px',
     'background-color': '#fff',
     'box-sizing': 'border-box',
     'padding': '1em'
@@ -47,8 +53,8 @@ $(function () {
 
   // The input to edit the list name
   var $editorListName
-  var EDITOR_LIST_NAME_SELECTOR = '#tumbTag-addListName'
-  var EDITOR_LIST_NAME_ELEM = '<input id="tumbTag-addListName"/>'
+  var EDITOR_LIST_NAME_SELECTOR = '#tumblrTag-editListNameInput'
+  var EDITOR_LIST_NAME_ELEM = '<input id="tumblrTag-editListNameInput"/>'
   var EDITOR_LIST_NAME_CSS = {
     'width': '100%',
     'margin-bottom': '1em'
@@ -56,49 +62,68 @@ $(function () {
 
   // The textarea to edit the list content
   var $editorListContent
-  var EDITOR_LIST_CONTENT_SELECTOR = '#tumbTag-addListTags'
-  var EDITOR_LIST_CONTENT_ELEM = '<textarea id="tumbTag-addListTags"></textarea>'
+  var EDITOR_LIST_CONTENT_SELECTOR = '#tumblrTag-editListTagsTextArea'
+  var EDITOR_LIST_CONTENT_ELEM = '<textarea id="tumblrTag-editListTagsTextArea"></textarea>'
   var EDITOR_LIST_CONTENT_CSS = {
     'width': '100%',
     'height': '100px'
   }
 
   // The button to create/edit the list
-  var $editorButton
-  var EDITOR_BUTTON_SELECTOR = '#tumbTag-addListButton'
-  var EDITOR_BUTTON_ELEM = '<button id="tumbTag-addListButton">Done</button>'
+  var $doneButton
+  var EDITOR_BUTTON_SELECTOR = '#tumblrTag-doneEditingListButton'
+  var EDITOR_BUTTON_ELEM = '<button id="tumblrTag-doneEditingListButton">Done</button>'
   var EDITOR_BUTTON_CSS = {
-    'padding': '.2em 1em',
+    'border-radius': '2px',
+    'padding': '0.3em 0.6em',
     'display': 'block',
+    'font-weight': '600',
+    'font-size': '.8em',
     'margin': '0 auto',
-    'background-color': '#529ecc'
+    'background-color': '#00b8ff'
   }
 
   // The lists
   var $lists
-  var LISTS_SELECTOR = '#tumbTag-lists'
-  var LISTS_ELEM = '<ul id="tumbTag-lists"></ul>'
+  var LISTS_SELECTOR = '#tumblrTag-lists'
+  var LISTS_ELEM = '<ul id="tumblrTag-lists"></ul>'
   var LISTS_CSS = {
     'max-height': '250px',
     'overflow-y': 'scroll'
   }
 
   // A list
-  var LIST_SELECTOR = '.tumbTag-list'
+  var LIST_SELECTOR = '.tumblrTag-list'
   var LIST_CSS = {
     'cursor': 'pointer',
     'padding': '10px',
+    'border-radius': '2px',
     'background-color': 'rgba(0, 0, 0, 0.07)',
     'margin-bottom': '1em'
   }
 
   // The icon to delete a list
-  var DELETE_LIST_SELECTOR = '.tumbTag-iconClose'
-  var DELETE_LIST_ELEM = '<i class="tumbTag-iconClose icon_close"></i>'
-  var DELETE_LIST_CSS = {
+  var DELETE_LIST_BUTTON_SELECTOR = '.tumblrTag-deleteListButton'
+  var DELETE_LIST_BUTTON_ELEM = '<i class="tumblrTag-deleteListButton icon_close"></i>'
+  var DELETE_LIST_BUTTON_CSS = {
+    'float': 'right',
+    'font-size': '1.3em',
+    'padding': '0.1em',
+    'border-radius': '2px',
+    'background-color': 'rgba(51, 51, 51, 0.5)',
+    'line-height': '1em'
+  }
+
+  // The icon to edit a list
+  var EDIT_LIST_BUTTON_SELECTOR = '.tumblrTag-editListButton'
+  var EDIT_LIST_BUTTON_ELEM = '<i class="tumblrTag-editListButton icon_edit_pencil"></i>'
+  var EDIT_LIST_BUTTON_ELEM_CSS = {
     'float': 'right',
     'margin-right': '.4em',
     'font-size': '1.3em',
+    'padding': '0.1em',
+    'border-radius': '2px',
+    'background-color': 'rgba(51, 51, 51, 0.5)',
     'line-height': '1em'
   }
 
@@ -111,6 +136,7 @@ $(function () {
   // Events
   var EVENT = {
     DOM_SUBTREE_MODIFIED: 'DOMSubtreeModified',
+    RESIZE: 'resize',
     CLICK: 'click',
     FOCUS: 'focus',
     BLUR: 'blur'
@@ -135,10 +161,6 @@ $(function () {
    * @type {Boolean}
    */
   var isDebugging
-
-  //////////
-  // INIT //
-  //////////
 
   /**
    * Inits the app.
@@ -208,12 +230,7 @@ $(function () {
   function initDebug () {
     // TODO handle `isDebugging` flag
     isDebugging = true
-    console.group('Tumblr Tag')
   }
-
-  ////////////
-  // RENDER //
-  ////////////
 
   /**
    * Renders the app.
@@ -235,7 +252,7 @@ $(function () {
 
     renderEditor()
 
-    adjustPosition()
+    updatePosition()
 
     // Bind the events
     bind()
@@ -253,9 +270,9 @@ $(function () {
     $actions.css(ACTIONS_ELEM_CSS)
 
     // Append the add/edit button
-    $actions.append(ADD_EDIT_LIST_ELEM)
-    $addList = $(ADD_EDIT_LIST_SELECTOR)
-    $addList.css(ADD_EDIT_LIST_ELEM_CSS)
+    $actions.append(CREATE_LIST_BUTTON_ELEM)
+    $createList = $(CREATE_LIST_SELECTOR)
+    $createList.css(CREATE_LIST_BUTTON_CSS)
   }
 
   /**
@@ -269,13 +286,21 @@ $(function () {
 
     // Append the lists
     $lists = $(LISTS_SELECTOR)
+    var listsCount = store.tags.length
     store.tags.forEach(function (tagObj) {
-      $lists.append('<li class="' + LIST_SELECTOR.slice(1) + '">' + tagObj.name + DELETE_LIST_ELEM + '</li>')
+      var elementStr
+      if (listsCount > 1) {
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '">' + tagObj.name + DELETE_LIST_BUTTON_ELEM + EDIT_LIST_BUTTON_ELEM + '</li>'
+      } else {
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '">' + tagObj.name + EDIT_LIST_BUTTON_ELEM + '</li>'
+      }
+      $lists.append(elementStr)
     })
 
     $lists.css(LISTS_CSS)
     $(LIST_SELECTOR).css(LIST_CSS)
-    $(DELETE_LIST_SELECTOR).css(DELETE_LIST_CSS)
+    $(DELETE_LIST_BUTTON_SELECTOR).css(DELETE_LIST_BUTTON_CSS)
+    $(EDIT_LIST_BUTTON_SELECTOR).css(EDIT_LIST_BUTTON_ELEM_CSS)
   }
 
   /**
@@ -289,7 +314,7 @@ $(function () {
     $editor.hide()
 
     // Container
-    $addList.after($editor)
+    $createList.after($editor)
     $editor.css(EDITOR_CSS)
 
     // List name
@@ -306,15 +331,19 @@ $(function () {
 
     // Validate List
     $editor.append(EDITOR_BUTTON_ELEM)
-    $editorButton = $(EDITOR_BUTTON_SELECTOR)
-    $editorButton.css(EDITOR_BUTTON_CSS)
+    $doneButton = $(EDITOR_BUTTON_SELECTOR)
+    $doneButton.css(EDITOR_BUTTON_CSS)
   }
 
   /**
    * Renders the editor.
    */
-  function fillEditor () {
-    debug('fillEditor')
+  function updateEditorData () {
+    debug('updateEditorData')
+
+    if (!isEditorVisible()) {
+      $editor.show()
+    }
 
     // Get the list data
     var name
@@ -322,16 +351,13 @@ $(function () {
     if (editingList) {
       name = editingList
       list = findList(editingList).list
-      $editorButton.text('Edit')
-    }
-    else {
+    } else {
       name = 'Blogging'
       list = [
         'tag1',
         'tag2',
         'tag3'
       ]
-      $editorButton.text('Done')
     }
 
     $editorListName.val(name)
@@ -348,46 +374,41 @@ $(function () {
     unbind()
 
     // Cleanup
-    $addList.remove()
+    $createList.remove()
     $actions.remove()
     $editor.remove()
     $editorListName.remove()
     $editorListContent.remove()
-    $editorButton.remove()
+    $doneButton.remove()
     $root.remove()
 
-    $addList = null
+    $createList = null
     $actions = null
     $editor = null
     $editorListName = null
     $editorListContent = null
-    $editorButton = null
+    $doneButton = null
     $root = null
   }
 
   /**
-   * Periodically check if `tumbTag` should be rendered.
+   * Periodically check if `tumblrTag` should be rendered.
    */
   function shouldRender () {
     setTimeout(function () {
+      debug('check')
       if ($(POST_CONTAINER_TAGS_SELECTOR).length) {
         if (!$root) {
+          debug('render')
           render()
         }
-
-      }
-      else if ($root) {
+      } else if ($root) {
+        debug('unmount')
         unmount()
       }
-
       shouldRender()
-
     }, 2000)
   }
-
-  /////////////
-  // ACTIONS //
-  /////////////
 
   /**
    * Sets the store in the `chrome.storage`.
@@ -442,10 +463,6 @@ $(function () {
     addList(name, list)
   }
 
-  ////////////
-  // EVENTS //
-  ////////////
-
   /**
    * Binds events on the element created.
    */
@@ -453,17 +470,21 @@ $(function () {
     debug('bind')
 
     // Tumblr
-    $(POST_CONTAINER_SELECTOR).on(EVENT.DOM_SUBTREE_MODIFIED, onDOMSubtreeModified)
+    $(POST_CONTAINER_SELECTOR).on(EVENT.DOM_SUBTREE_MODIFIED, handleDOMSubtreeModified)
+    window.addEventListener(EVENT.RESIZE, handleWindowResize)
 
-    // Add/edit list
-    $(ADD_EDIT_LIST_SELECTOR).on(EVENT.CLICK, onClickPencil)
+    // Add list
+    $(CREATE_LIST_SELECTOR).on(EVENT.CLICK, handleClickCreateList)
 
     // List
-    $(LIST_SELECTOR).on(EVENT.CLICK, onClickList)
-    $(DELETE_LIST_SELECTOR).on(EVENT.CLICK, onClickDeleteList)
+    $(LIST_SELECTOR).on(EVENT.CLICK, handleClickList)
+
+    // List item actions
+    $(DELETE_LIST_BUTTON_SELECTOR).on(EVENT.CLICK, handleClickDeleteList)
+    $(EDIT_LIST_BUTTON_SELECTOR).on(EVENT.CLICK, handleClickEditList)
 
     // Editor
-    $editorButton.on(EVENT.CLICK, onClickEditorButton)
+    $doneButton.on(EVENT.CLICK, handleClickDone)
   }
 
   /**
@@ -473,40 +494,36 @@ $(function () {
     debug('unbind')
 
     // Tumblr
-    $(POST_CONTAINER_SELECTOR).off(EVENT.DOM_SUBTREE_MODIFIED, onDOMSubtreeModified)
+    $(POST_CONTAINER_SELECTOR).off(EVENT.DOM_SUBTREE_MODIFIED, handleDOMSubtreeModified)
+    window.removeEventListener(EVENT.RESIZE, handleWindowResize)
 
     // Add/edit list
-    $(ADD_EDIT_LIST_SELECTOR).off(EVENT.CLICK, onClickPencil)
+    $(CREATE_LIST_SELECTOR).off(EVENT.CLICK, handleClickCreateList)
 
     // List
-    $(LIST_SELECTOR).on(EVENT.CLICK, onClickList)
-    $(DELETE_LIST_SELECTOR).on(EVENT.CLICK, onClickDeleteList)
+    $(LIST_SELECTOR).off(EVENT.CLICK, handleClickList)
+    $(DELETE_LIST_BUTTON_SELECTOR).off(EVENT.CLICK, handleClickDeleteList)
 
     // Editor
-    if ($editorButton) {
-      $editorButton.off(EVENT.CLICK, onClickEditorButton)
+    if ($doneButton) {
+      $doneButton.off(EVENT.CLICK, handleClickDone)
     }
   }
-
-  ////////////////////
-  // EVENT HANDLERS //
-  ////////////////////
 
   /**
    * Callback triggered when a list is clicked.
    * @param  {Event} event
    * @return {Boolean}
    */
-  function onClickList (event) {
-    debug('onClickList: event ', event)
+  function handleClickList (event) {
+    debug('handleClickList: event ', event)
 
-    // If the add list selector is open, edit the list
     let index = $(event.currentTarget).index()
     if (isEditorVisible()) {
-      editTagList(index)
-    }
-    //  If the add list selector is closed, append the tags
-    else {
+      // If the add list selector is open, edit the list
+      getListAndRender(index)
+    } else {
+      //  If the add list selector is closed, append the tags
       appendTagsToPost(index)
     }
 
@@ -517,16 +534,15 @@ $(function () {
    * Sets the `editingList` and renders the editor.
    * @param  {Number} index
    */
-  function editTagList (index) {
-    debug('editTagList: index', index)
+  function getListAndRender (index) {
+    debug('getListAndRender: index', index)
 
     // Get the list being edited
     var list = store.tags[index]
     editingList = list.name
 
     // Render the list
-    fillEditor()
-
+    updateEditorData()
   }
 
   /**
@@ -536,7 +552,7 @@ $(function () {
   function deleteList (name) {
     debug('deleteList: name ', name)
 
-    // Delete the list that match the givne name
+    // Delete the list that match the given name
     store.tags = store.tags.filter(function (obj) {
       return obj.name !== name
     })
@@ -554,29 +570,50 @@ $(function () {
    * @param  {Event} event
    * @return {Boolean}
    */
-  function onClickDeleteList (event) {
-    debug('onClickDeleteList: event', event)
-
+  function handleClickDeleteList (event) {
+    debug('handleClickDeleteList: event', event)
+    event.preventDefault()
     deleteList($(event.currentTarget).parent().text())
     return false
 
   }
 
   /**
-   * Callback triggerd when the post container's subtree is modified.
-   * It adjusts the position of the `tumbTag` element.
+   * Callback triggered when the edit list icon is clicked.
+   * @param  {Event} event
+   * @return {Boolean}
    */
-  function onDOMSubtreeModified () {
-    adjustPosition()
+  function handleClickEditList (event) {
+    debug('handleClickEditList: event', event)
+    var currentTarget = event.currentTarget.parentElement
+    var ulElement = event.currentTarget.parentElement.parentElement.children
+    var listIndex = Array.prototype.indexOf.call(ulElement, currentTarget)
+    if (listIndex === -1) {
+      listIndex = 0
+    }
+    getListAndRender(listIndex)
+    event.preventDefault()
+    return false
+  }
+
+  /**
+   * Callback triggered when the post container's subtree is modified.
+   * It adjusts the position of the `tumblrTag` element.
+   */
+  function handleDOMSubtreeModified () {
+    updatePosition()
+  }
+
+  function handleWindowResize () {
+    updatePosition()
   }
 
   /**
    * Callback triggered when the pencil is clicked.
    * It shows/hide the editor.
    */
-  function onClickPencil () {
+  function handleClickCreateList () {
     toggleEditor()
-    adjustPosition()
   }
 
   /**
@@ -584,7 +621,7 @@ $(function () {
    * It add/edit the list and set it to the storage.
    * @return {Boolean}
    */
-  function onClickEditorButton () {
+  function handleClickDone () {
     let listName = getUniqueListName($editorListName.val())
     let tags = $editorListContent.val().replace(/\r\n/g, '\n').split('\n')
     tags = tags.filter(function (tag) { return !!tag })
@@ -592,8 +629,7 @@ $(function () {
     if (editingList) {
       editList(listName, tags)
       editingList = null
-    }
-    else {
+    } else {
       addList(listName, tags)
     }
 
@@ -603,10 +639,6 @@ $(function () {
     return false
 
   }
-
-  ///////////////////////
-  // DOM MANIPULATIONS //
-  ///////////////////////
 
   /**
    * Appends the tags to the post.
@@ -634,17 +666,19 @@ $(function () {
   }
 
   /**
-   * Adjusts the position of the `tumbTag` element.
+   * Adjusts the position of the `tumblrTag` element.
    */
-  function adjustPosition () {
+  function updatePosition () {
+    debug('updatePosition')
     var $postContainer = $('.post-container')
-    var postTop = $postContainer.offset().top
     var postLeft = $postContainer.offset().left
-    var postHeight = $postContainer.height()
+    // var postHeight = $postContainer.height()
     var postWidth = $postContainer.width()
-    var extraHeight = isEditorVisible() ? 250 : 0
 
-    var finalTop = (postTop + postHeight + extraHeight)
+    var finalTop = (window.innerHeight / 1.8)
+    if (isEditorVisible()) {
+      finalTop += EDITOR_HEIGHT
+    }
     $root.css('top', finalTop.toString() + 'px')
     $root.css('left', (postLeft + postWidth + 200).toString() + 'px')
 
@@ -656,7 +690,7 @@ $(function () {
   function toggleEditor () {
     // If the editor is visible, hide it
     if (isEditorVisible()) {
-      hideEditor()
+      hideEditor(updatePosition)
       return
     }
 
@@ -666,23 +700,22 @@ $(function () {
     }
 
     // If the editor is hidden, show it
-    fillEditor()
-    showEditor()
-
+    updateEditorData()
+    showEditor(updatePosition)
   }
 
   /**
    * Hides the editor.
    */
-  function hideEditor () {
-    $editor.hide('medium')
+  function hideEditor (callback) {
+    $editor.hide('medium', callback)
   }
 
   /**
    * Shows the editor.
    */
-  function showEditor () {
-    $editor.show('medium')
+  function showEditor (callback) {
+    $editor.show('medium', callback)
   }
 
   /**
@@ -690,12 +723,9 @@ $(function () {
    * @return {Boolean}
    */
   function isEditorVisible () {
+    debug('isEditorVisible: ', $editor.css('display'))
     return $editor && $editor.css('display') === 'block'
   }
-
-  /////////////
-  // GETTERS //
-  /////////////
 
   /**
    * Gets an unique list name.
@@ -722,13 +752,11 @@ $(function () {
     return listName
   }
 
-  ///////////
-  // UTILS //
-  ///////////
-
   /**
    * Logs the `arguments` if the `isDebugging` flag is on.
    */
+  var log = console.log.bind(null, '[tumblrTag]')
+
   function debug () {
     // If it's not in debug mode, noop
     if (!isDebugging) {
@@ -736,7 +764,7 @@ $(function () {
     }
 
     // If it's debug mode, log it
-    console.log.apply(null, arguments)
+    log.apply(null, arguments)
   }
 
   /**
@@ -762,10 +790,10 @@ $(function () {
     })
   }
 
-  ///////////
-  // ENTRY //
-  ///////////
-
   // Init
-  init()
+  try {
+    init()
+  } catch (error) {
+    debug('[error]: ', error)
+  }
 })
