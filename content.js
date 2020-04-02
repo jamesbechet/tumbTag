@@ -681,7 +681,6 @@ $(function () {
     }
     $root.css('top', finalTop.toString() + 'px')
     $root.css('left', (postLeft + postWidth + 200).toString() + 'px')
-
   }
 
   /**
@@ -773,8 +772,8 @@ $(function () {
   function sort () {
     debug('sort: %o', store)
 
-    store.tags = store.tags.sort(function (tagObj) {
-      return tagObj.name.toLowerCase()
+    store.tags = store.tags.sort(function (obj1, obj2) {
+      return obj1.name.toLowerCase().localeCompare(obj2.name.toLowerCase())
     })
   }
 
