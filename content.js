@@ -290,9 +290,9 @@ $(function () {
     store.tags.forEach(function (tagObj) {
       var elementStr
       if (listsCount > 1) {
-        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '">' + tagObj.name + DELETE_LIST_BUTTON_ELEM + EDIT_LIST_BUTTON_ELEM + '</li>'
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + DELETE_LIST_BUTTON_ELEM + EDIT_LIST_BUTTON_ELEM + '</li>'
       } else {
-        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '">' + tagObj.name + EDIT_LIST_BUTTON_ELEM + '</li>'
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + '</li>'
       }
       $lists.append(elementStr)
     })
