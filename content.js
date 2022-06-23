@@ -87,10 +87,21 @@ $(function () {
   var $lists
   var LISTS_SELECTOR = '#tumblrTag-lists'
   var LISTS_ELEM = '<ul id="tumblrTag-lists"></ul>'
-  var LISTS_CSS = {
-    'max-height': '250px',
-    'overflow-y': 'scroll'
+
+  function getListsHeight () {
+    return window.innerHeight / 2
   }
+  function getListsCss () {
+    return {
+      'max-height': getListsHeight() + 'px',
+      'overflow-y': 'scroll'
+    }
+  }
+  //
+  // var LISTS_CSS = {
+  //   'max-height': '250px',
+  //   'overflow-y': 'scroll'
+  // }
 
   // A list
   var LIST_SELECTOR = '.tumblrTag-list'
@@ -297,7 +308,7 @@ $(function () {
       $lists.append(elementStr)
     })
 
-    $lists.css(LISTS_CSS)
+    $lists.css(getListsCss())
     $(LIST_SELECTOR).css(LIST_CSS)
     $(DELETE_LIST_BUTTON_SELECTOR).css(DELETE_LIST_BUTTON_CSS)
     $(EDIT_LIST_BUTTON_SELECTOR).css(EDIT_LIST_BUTTON_ELEM_CSS)
@@ -672,15 +683,18 @@ $(function () {
     debug('updatePosition')
     var $postContainer = $('.post-container')
     var postLeft = $postContainer.offset().left
+    var postTop = $postContainer.offset().top
     // var postHeight = $postContainer.height()
     var postWidth = $postContainer.width()
 
-    var finalTop = (window.innerHeight / 1.8)
-    if (isEditorVisible()) {
-      finalTop += EDITOR_HEIGHT
-    }
+    var finalTop = postTop + $root.height()
+    // var finalTop = (window.innerHeight / 1.8)
+    // if (isEditorVisible()) {
+    //   finalTop += EDITOR_HEIGHT
+    // }
     $root.css('top', finalTop.toString() + 'px')
     $root.css('left', (postLeft + postWidth + 200).toString() + 'px')
+    $lists.css(getListsCss())
   }
 
   /**
