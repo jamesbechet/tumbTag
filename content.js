@@ -1,6 +1,7 @@
 $(function () {
   // The app
   var $root
+  var timerId
   var ROOT_SELECTOR = '#tumblrTag'
   var ROOT_ELEM = '<div id="tumblrTag"></div>'
   var ROOT_CSS = {
@@ -14,6 +15,8 @@ $(function () {
     'margin-bottom': '1em',
     '-webkit-transition': 'top .3s ease-in-out'
   }
+
+  var SHOULD_RENDER_CHECK_TIMER_MS = 1000
 
   // The actions container
   var $actions
@@ -177,14 +180,15 @@ $(function () {
    * Inits the app.
    */
   function init () {
-    debug('init')
-
-    // Get the store
-    initStore()
-
     // Init the debug flags
     initDebug()
 
+    debug('init')
+
+    // Get the store
+    setTimeout(() => {
+      initStore()
+    }, 1000)
   }
 
   /**
@@ -406,19 +410,22 @@ $(function () {
    * Periodically check if `tumblrTag` should be rendered.
    */
   function shouldRender () {
-    setTimeout(function () {
-      debug('check')
-      if ($(POST_CONTAINER_TAGS_SELECTOR).length) {
-        if (!$root) {
-          debug('render')
-          render()
-        }
-      } else if ($root) {
-        debug('unmount')
+    clearTimeout(timerId)
+    timerId = setTimeout(function () {
+      var hasTagsInput = !!document.querySelector(POST_CONTAINER_TAGS_SELECTOR)
+      debug('shouldRender#check hasTagsInput: ', hasTagsInput)
+      if (hasTagsInput && !$root) {
+        debug('shouldRender#render')
+        render()
+      } else if (!hasTagsInput && $root) {
+        debug('shouldRender#unmount')
         unmount()
+      } else if (hasTagsInput && $root) {
+        debug('shouldRender#updatePosition')
+        updatePosition()
       }
       shouldRender()
-    }, 2000)
+    }, SHOULD_RENDER_CHECK_TIMER_MS)
   }
 
   /**
@@ -680,20 +687,24 @@ $(function () {
    * Adjusts the position of the `tumblrTag` element.
    */
   function updatePosition () {
-    debug('updatePosition')
-    var $postContainer = $('.post-container')
-    var postLeft = $postContainer.offset().left
-    var postTop = $postContainer.offset().top
-    // var postHeight = $postContainer.height()
-    var postWidth = $postContainer.width()
+    // debug('updatePosition')
+    var $tagsInputContainer = $('.post-form--tag-editor')
+    var tagsInputContainerLeft = $tagsInputContainer.offset().left
+    var tagsInputContainerTop = $tagsInputContainer.offset().top
+    // debug('tagsInputContainerTop: ', tagsInputContainerTop)
+    // var tagsInputContainerHeight = $tagsInputContainer.height()
+    var tagsInputContainerWidth = $tagsInputContainer.width()
 
-    var finalTop = postTop + $root.height()
+    // var rootHeight = $root.height()
+    // debug('rootHeight: ', rootHeight)
+    var finalTop = tagsInputContainerTop //- rootHeight
+    // debug('finalTop: ', finalTop)
     // var finalTop = (window.innerHeight / 1.8)
     // if (isEditorVisible()) {
     //   finalTop += EDITOR_HEIGHT
     // }
     $root.css('top', finalTop.toString() + 'px')
-    $root.css('left', (postLeft + postWidth + 200).toString() + 'px')
+    $root.css('left', (tagsInputContainerLeft + tagsInputContainerWidth + 200).toString() + 'px')
     $lists.css(getListsCss())
   }
 
