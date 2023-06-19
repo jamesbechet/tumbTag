@@ -152,6 +152,7 @@ $(function () {
   // Other Selectors
   var POST_CONTAINER_SELECTOR = '.post-container'
   var POST_CONTAINER_TAGS_INPUT_SELECTOR = '#glass-container textarea'
+  var CONTAINER_WRAPPER_SELECTOR = 'div[data-testid="base-container-wrapper"]'
   var BUTTON_OVERLAY_SELECTOR = '#glass-container button[aria-label="Close"]'
   var BUTTON_OVERLAY_WRAPPER_SELECTOR = '#glass-container div[role="dialog"]'
   var SETTINGS_ICON = 'button[aria-label="Settings"]'
@@ -739,7 +740,13 @@ $(function () {
     }
     const tagTextArea = document.querySelector(POST_CONTAINER_TAGS_INPUT_SELECTOR)
     simulateReactTextAreaChangeEvent(tagTextArea, tag)
-    simulateEnterKey(tagTextArea)
+    const suggestionButton = document.querySelector(`${CONTAINER_WRAPPER_SELECTOR} button[aria-label="${tag}"]`)
+    debug('addTagsToPost: suggestionButton=', suggestionButton)
+    if (suggestionButton) {
+      suggestionButton.click()
+    } else {
+      simulateEnterKey(tagTextArea)
+    }
     setTimeout(() => {
       addTagsOneByOne(tags)
     }, ADDING_TAG_DELAY)
