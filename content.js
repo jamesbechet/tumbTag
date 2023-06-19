@@ -1,4 +1,6 @@
 $(function () {
+
+  var ADDING_TAG_DELAY = 0
   // The app
   var $root
   var timerId
@@ -6,7 +8,7 @@ $(function () {
   var ROOT_ELEM = '<div id="tumblrTag"></div>'
   var ROOT_CSS = {
     'position': 'absolute',
-    'left': '1200px',
+    'left': '1250px',
     'top': '400px',
     '-webkit-transform': 'translateX(-50%) translateY(-100%)',
     'z-index': '1011',
@@ -97,7 +99,8 @@ $(function () {
   function getListsCss () {
     return {
       'max-height': getListsHeight() + 'px',
-      'overflow-y': 'scroll'
+      'overflow-y': 'scroll',
+      'padding-left': 0
     }
   }
   //
@@ -110,42 +113,49 @@ $(function () {
   var LIST_SELECTOR = '.tumblrTag-list'
   var LIST_CSS = {
     'cursor': 'pointer',
-    'padding': '10px',
-    'border-radius': '2px',
-    'background-color': 'rgba(0, 0, 0, 0.07)',
-    'margin-bottom': '1em'
+    'padding': '12px',
+    'border-radius': '6px',
+    'background-color': 'rgba(0, 0, 0, 0.2)',
+    'margin-bottom': '1em',
+    'display': 'flex',
+    'align-items': 'center',
+    'height': '24px',
+    'line-height': '20px'
   }
 
   // The icon to delete a list
   var DELETE_LIST_BUTTON_SELECTOR = '.tumblrTag-deleteListButton'
-  var DELETE_LIST_BUTTON_ELEM = '<i class="tumblrTag-deleteListButton icon_close"></i>'
+  // var DELETE_LIST_BUTTON_ELEM = '<i class="tumblrTag-deleteListButton icon_close"></i>'
+  var DELETE_LIST_BUTTON_ELEM = `
+  <button class="tumblrTag-deleteListButton" aria-label="Dismiss Recommendation"><span class="" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" role="presentation" style="--icon-color-primary: white"><use href="#managed-icon__close"></use></svg></span></button>
+  `
   var DELETE_LIST_BUTTON_CSS = {
     'float': 'right',
     'font-size': '1.3em',
     'padding': '0.1em',
     'border-radius': '2px',
-    'background-color': 'rgba(51, 51, 51, 0.5)',
     'line-height': '1em'
   }
 
   // The icon to edit a list
   var EDIT_LIST_BUTTON_SELECTOR = '.tumblrTag-editListButton'
-  var EDIT_LIST_BUTTON_ELEM = '<i class="tumblrTag-editListButton icon_edit_pencil"></i>'
+  var EDIT_LIST_BUTTON_ELEM = '<i class="tumblrTag-editListButton icon_edit_pencil"><svg xmlns="http://www.w3.org/2000/svg" height="14" width="16" role="presentation"><use href="#managed-icon__post"></use></svg></i>'
   var EDIT_LIST_BUTTON_ELEM_CSS = {
     'float': 'right',
     'margin-right': '.4em',
     'font-size': '1.3em',
     'padding': '0.1em',
     'border-radius': '2px',
-    'background-color': 'rgba(51, 51, 51, 0.5)',
     'line-height': '1em'
   }
 
   // Other Selectors
   var POST_CONTAINER_SELECTOR = '.post-container'
-  var POST_CONTAINER_TAGS_SELECTOR = '.post-form--tag-editor'
-  var POST_CONTAINER_TAGS_INPUT_SELECTOR = '.tag-input-wrapper .editor-plaintext'
-  var POST_CONTAINER_TAGS_INPUT_WRAPPER_SELECTOR = '.tag-input-wrapper .editor-placeholder'
+  var POST_CONTAINER_TAGS_INPUT_SELECTOR = '#glass-container textarea'
+  var BUTTON_OVERLAY_SELECTOR = '#glass-container button[aria-label="Close"]'
+  var BUTTON_OVERLAY_WRAPPER_SELECTOR = '#glass-container div[role="dialog"]'
+  var SETTINGS_ICON = 'button[aria-label="Settings"]'
+  var POST_CONTAINER_TAGS_SELECTOR = POST_CONTAINER_TAGS_INPUT_SELECTOR
 
   // Events
   var EVENT = {
@@ -305,9 +315,9 @@ $(function () {
     store.tags.forEach(function (tagObj) {
       var elementStr
       if (listsCount > 1) {
-        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + DELETE_LIST_BUTTON_ELEM + EDIT_LIST_BUTTON_ELEM + '</li>'
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' +  EDIT_LIST_BUTTON_ELEM + DELETE_LIST_BUTTON_ELEM + '</li>'
       } else {
-        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + '</li>'
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + '</li>'
       }
       $lists.append(elementStr)
     })
@@ -350,6 +360,48 @@ $(function () {
     $doneButton.css(EDITOR_BUTTON_CSS)
   }
 
+  function showOverlay () {
+    const overlayWrapper = document.querySelector(BUTTON_OVERLAY_WRAPPER_SELECTOR)
+    debug('showOverlay: overlayWrapper=', overlayWrapper)
+    if (!overlayWrapper) {
+      debug('showOverlay: [noop] no overlayWrapper')
+      return
+    }
+    overlayWrapper.style['background-color'] = 'rgba(0, 25, 53, 0.85)'
+  }
+
+  function hideOverlay () {
+    const overlayWrapper = document.querySelector(BUTTON_OVERLAY_WRAPPER_SELECTOR)
+    debug('hideOverlay: overlayWrapper=', overlayWrapper)
+    if (!overlayWrapper) {
+      debug('hideOverlay: [noop] no overlayWrapper')
+      return
+    }
+    overlayWrapper.style['background-color'] = 'initial'
+  }
+
+  function hideTumblrOverlayButton() {
+    const element = document.querySelector(BUTTON_OVERLAY_SELECTOR)
+      debug('hideTumblrOverlayButton: element=', element)
+    if (!element) {
+      debug('hideTumblrOverlayButton: [noop] no element')
+      return
+    }
+    element.style.display = 'none'
+    showOverlay()
+  }
+
+  function showTumblrOverlayButton() {
+    const element = document.querySelector(BUTTON_OVERLAY_SELECTOR)
+      debug('showTumblrOverlayButton: element=', element)
+    if (!element) {
+      debug('showTumblrOverlayButton: [noop] no element')
+      return
+    }
+    element.style.display = 'block'
+    hideOverlay()
+  }
+
   /**
    * Renders the editor.
    */
@@ -357,7 +409,7 @@ $(function () {
     debug('updateEditorData')
 
     if (!isEditorVisible()) {
-      $editor.show()
+      showEditor()
     }
 
     // Get the list data
@@ -542,7 +594,7 @@ $(function () {
       getListAndRender(index)
     } else {
       //  If the add list selector is closed, append the tags
-      appendTagsToPost(index)
+      addTagsToPost(index)
     }
 
     return false
@@ -589,9 +641,16 @@ $(function () {
    * @return {Boolean}
    */
   function handleClickDeleteList (event) {
+    const currentTarget = event.currentTarget
     debug('handleClickDeleteList: event', event)
+    debug('handleClickDeleteList: currentTarget', currentTarget)
+    const tagList = currentTarget.closest(LIST_SELECTOR)
+    if (!tagList) {
+      debug('handleClickDeleteList: [noop] no tagList')
+      return
+    }
     event.preventDefault()
-    deleteList($(event.currentTarget).parent().text())
+    deleteList(tagList.querySelector('span').textContent)
     return false
 
   }
@@ -636,7 +695,7 @@ $(function () {
 
   /**
    * Callback triggered when the editor button is clicked.
-   * It add/edit the list and set it to the storage.
+   * It adds/edits the list and set it to the storage.
    * @return {Boolean}
    */
   function handleClickDone () {
@@ -658,53 +717,58 @@ $(function () {
 
   }
 
+  function simulateReactTextAreaChangeEvent (element, text) {
+    var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+    nativeInputValueSetter.call(element, text);
+    var ev2 = new Event('input', { bubbles: true});
+    element.dispatchEvent(ev2);
+  }
+  function simulateEnterKey (element) {
+    const ke = new KeyboardEvent('keydown', {
+      bubbles: true, cancelable: true, keyCode: 13
+    });
+    element.dispatchEvent(ke);
+  }
+
+  function addTagsOneByOne (tags) {
+    const tag = tags.shift()
+    debug('addTagsToPost: tags=', tags)
+    debug('addTagsToPost: tag=', tag)
+    if (!tag) {
+      return
+    }
+    const tagTextArea = document.querySelector(POST_CONTAINER_TAGS_INPUT_SELECTOR)
+    simulateReactTextAreaChangeEvent(tagTextArea, tag)
+    simulateEnterKey(tagTextArea)
+    setTimeout(() => {
+      addTagsOneByOne(tags)
+    }, ADDING_TAG_DELAY)
+  }
   /**
    * Appends the tags to the post.
-   * @param  {Number} index
+   * @param  {Number} listIndex
    */
-  function appendTagsToPost (index) {
-    debug('appendTagsToPost: index ', index)
-
-    // Get the list
-    var obj = store.tags[index]
-
-    // Append the tags
-    var $tagInput = $(POST_CONTAINER_TAGS_INPUT_SELECTOR)
-    obj.list.forEach(function (tag) {
-      $tagInput.append('<span>' + tag + '</span>')
-      $tagInput.trigger(EVENT.FOCUS)
-      $tagInput.trigger(EVENT.BLUR)
-    })
-
-    // HACK, validate the tags input
-    setTimeout(function () {
-      $(POST_CONTAINER_TAGS_INPUT_WRAPPER_SELECTOR).text('')
-    }, 0)
-
+  function addTagsToPost (listIndex) {
+    debug('addTagsToPost: listIndex ', listIndex)
+    var obj = store.tags[listIndex]
+    addTagsOneByOne(obj.list.slice())
   }
+
 
   /**
    * Adjusts the position of the `tumblrTag` element.
    */
   function updatePosition () {
-    // debug('updatePosition')
-    var $tagsInputContainer = $('.post-form--tag-editor')
-    var tagsInputContainerLeft = $tagsInputContainer.offset().left
-    var tagsInputContainerTop = $tagsInputContainer.offset().top
-    // debug('tagsInputContainerTop: ', tagsInputContainerTop)
-    // var tagsInputContainerHeight = $tagsInputContainer.height()
-    var tagsInputContainerWidth = $tagsInputContainer.width()
+    var $settingsIcon = $(SETTINGS_ICON)
+    if (!$settingsIcon) {
+      debug('updatePosition: [noop] no settings icon')
+      return
+    }
 
-    // var rootHeight = $root.height()
-    // debug('rootHeight: ', rootHeight)
-    var finalTop = tagsInputContainerTop //- rootHeight
-    // debug('finalTop: ', finalTop)
-    // var finalTop = (window.innerHeight / 1.8)
-    // if (isEditorVisible()) {
-    //   finalTop += EDITOR_HEIGHT
-    // }
-    $root.css('top', finalTop.toString() + 'px')
-    $root.css('left', (tagsInputContainerLeft + tagsInputContainerWidth + 200).toString() + 'px')
+    var left = $settingsIcon.offset().left + 200
+    var top = $settingsIcon.offset().top + ($lists.height() * 1.5)
+    $root.css('top', top.toString() + 'px')
+    $root.css('left', left.toString() + 'px')
     $lists.css(getListsCss())
   }
 
@@ -733,6 +797,7 @@ $(function () {
    */
   function hideEditor (callback) {
     $editor.hide('medium', callback)
+    showTumblrOverlayButton()
   }
 
   /**
@@ -740,6 +805,7 @@ $(function () {
    */
   function showEditor (callback) {
     $editor.show('medium', callback)
+    hideTumblrOverlayButton()
   }
 
   /**
