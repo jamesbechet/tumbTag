@@ -96,6 +96,7 @@ $(function () {
   function getListsHeight () {
     return window.innerHeight / 2
   }
+
   function getListsCss () {
     return {
       'max-height': getListsHeight() + 'px',
@@ -103,6 +104,7 @@ $(function () {
       'padding-left': 0
     }
   }
+
   //
   // var LISTS_CSS = {
   //   'max-height': '250px',
@@ -125,9 +127,10 @@ $(function () {
 
   // The icon to delete a list
   var DELETE_LIST_BUTTON_SELECTOR = '.tumblrTag-deleteListButton'
-  // var DELETE_LIST_BUTTON_ELEM = '<i class="tumblrTag-deleteListButton icon_close"></i>'
+  // var DELETE_LIST_BUTTON_ELEM = '<i class="tumblrTag-deleteListButton
+  // icon_close"></i>'
   var DELETE_LIST_BUTTON_ELEM = `
-  <button class="tumblrTag-deleteListButton" aria-label="Dismiss Recommendation"><span class="" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" role="presentation" style="--icon-color-primary: white"><use href="#managed-icon__close"></use></svg></span></button>
+  <button class='tumblrTag-deleteListButton' aria-label='Dismiss Recommendation'><span class='' tabindex='-1'><svg xmlns='http://www.w3.org/2000/svg' height='14' width='14' role='presentation' style='--icon-color-primary: white'><use href='#managed-icon__close'></use></svg></span></button>
   `
   var DELETE_LIST_BUTTON_CSS = {
     'float': 'right',
@@ -152,11 +155,36 @@ $(function () {
   // Other Selectors
   var POST_CONTAINER_SELECTOR = '.post-container'
   var POST_CONTAINER_TAGS_INPUT_SELECTOR = '#glass-container textarea'
+  var POST_CONTAINER_TAGS_INPUT_WRAPPER_SELECTOR_LEGACY = '.post-form--tag-editor .editor-plaintext'
+  var POST_CONTAINER_TAGS_INPUT_SELECTOR_LEGACY = '.post-form--tag-editor .editor-plaintext span'
   var CONTAINER_WRAPPER_SELECTOR = 'div[data-testid="base-container-wrapper"]'
   var BUTTON_OVERLAY_SELECTOR = '#glass-container button[aria-label="Close"]'
   var BUTTON_OVERLAY_WRAPPER_SELECTOR = '#glass-container div[role="dialog"]'
   var SETTINGS_ICON = 'button[aria-label="Settings"]'
-  var POST_CONTAINER_TAGS_SELECTOR = POST_CONTAINER_TAGS_INPUT_SELECTOR
+  var SETTINGS_ICON_LEGACY = '.post-settings'
+
+  function getSettingsIcon () {
+    return (
+      document.querySelector(SETTINGS_ICON) ||
+      document.querySelector(SETTINGS_ICON_LEGACY)
+    )
+  }
+
+  function getLegacyTagInput () {
+    return document.querySelector(POST_CONTAINER_TAGS_INPUT_SELECTOR_LEGACY)
+  }
+
+  function getLegacyTagInputWrapper () {
+    return document.querySelector(
+      POST_CONTAINER_TAGS_INPUT_WRAPPER_SELECTOR_LEGACY)
+  }
+
+  function getTagInput () {
+    return (
+      document.querySelector(POST_CONTAINER_TAGS_INPUT_SELECTOR) ||
+      getLegacyTagInput()
+    )
+  }
 
   // Events
   var EVENT = {
@@ -316,7 +344,7 @@ $(function () {
     store.tags.forEach(function (tagObj) {
       var elementStr
       if (listsCount > 1) {
-        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' +  EDIT_LIST_BUTTON_ELEM + DELETE_LIST_BUTTON_ELEM + '</li>'
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + DELETE_LIST_BUTTON_ELEM + '</li>'
       } else {
         elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + '</li>'
       }
@@ -347,13 +375,15 @@ $(function () {
     $editor.append(EDITOR_LIST_NAME_ELEM)
     $editorListName = $(EDITOR_LIST_NAME_SELECTOR)
     $editorListName.css(EDITOR_LIST_NAME_CSS)
-    $editorListName.before('<p style="font-size:13px;font-weight:700;color:#444">List name</p>')
+    $editorListName.before(
+      '<p style="font-size:13px;font-weight:700;color:#444">List name</p>')
 
     // List tags
     $editor.append(EDITOR_LIST_CONTENT_ELEM)
     $editorListContent = $(EDITOR_LIST_CONTENT_SELECTOR)
     $editorListContent.css(EDITOR_LIST_CONTENT_CSS)
-    $editorListContent.before('<p style="font-size:13px;font-weight:700;color:#444">List tags</p>')
+    $editorListContent.before(
+      '<p style="font-size:13px;font-weight:700;color:#444">List tags</p>')
 
     // Validate List
     $editor.append(EDITOR_BUTTON_ELEM)
@@ -362,7 +392,8 @@ $(function () {
   }
 
   function showOverlay () {
-    const overlayWrapper = document.querySelector(BUTTON_OVERLAY_WRAPPER_SELECTOR)
+    const overlayWrapper = document.querySelector(
+      BUTTON_OVERLAY_WRAPPER_SELECTOR)
     debug('showOverlay: overlayWrapper=', overlayWrapper)
     if (!overlayWrapper) {
       debug('showOverlay: [noop] no overlayWrapper')
@@ -372,7 +403,8 @@ $(function () {
   }
 
   function hideOverlay () {
-    const overlayWrapper = document.querySelector(BUTTON_OVERLAY_WRAPPER_SELECTOR)
+    const overlayWrapper = document.querySelector(
+      BUTTON_OVERLAY_WRAPPER_SELECTOR)
     debug('hideOverlay: overlayWrapper=', overlayWrapper)
     if (!overlayWrapper) {
       debug('hideOverlay: [noop] no overlayWrapper')
@@ -381,9 +413,9 @@ $(function () {
     overlayWrapper.style['background-color'] = 'initial'
   }
 
-  function hideTumblrOverlayButton() {
+  function hideTumblrOverlayButton () {
     const element = document.querySelector(BUTTON_OVERLAY_SELECTOR)
-      debug('hideTumblrOverlayButton: element=', element)
+    debug('hideTumblrOverlayButton: element=', element)
     if (!element) {
       debug('hideTumblrOverlayButton: [noop] no element')
       return
@@ -392,9 +424,9 @@ $(function () {
     showOverlay()
   }
 
-  function showTumblrOverlayButton() {
+  function showTumblrOverlayButton () {
     const element = document.querySelector(BUTTON_OVERLAY_SELECTOR)
-      debug('showTumblrOverlayButton: element=', element)
+    debug('showTumblrOverlayButton: element=', element)
     if (!element) {
       debug('showTumblrOverlayButton: [noop] no element')
       return
@@ -465,7 +497,7 @@ $(function () {
   function shouldRender () {
     clearTimeout(timerId)
     timerId = setTimeout(function () {
-      var hasTagsInput = !!document.querySelector(POST_CONTAINER_TAGS_SELECTOR)
+      var hasTagsInput = !!getTagInput()
       debug('shouldRender#check hasTagsInput: ', hasTagsInput)
       if (hasTagsInput && !$root) {
         debug('shouldRender#render')
@@ -541,7 +573,10 @@ $(function () {
     debug('bind')
 
     // Tumblr
-    $(POST_CONTAINER_SELECTOR).on(EVENT.DOM_SUBTREE_MODIFIED, handleDOMSubtreeModified)
+    $(POST_CONTAINER_SELECTOR).on(
+      EVENT.DOM_SUBTREE_MODIFIED,
+      handleDOMSubtreeModified
+    )
     window.addEventListener(EVENT.RESIZE, handleWindowResize)
 
     // Add list
@@ -565,7 +600,10 @@ $(function () {
     debug('unbind')
 
     // Tumblr
-    $(POST_CONTAINER_SELECTOR).off(EVENT.DOM_SUBTREE_MODIFIED, handleDOMSubtreeModified)
+    $(POST_CONTAINER_SELECTOR).off(
+      EVENT.DOM_SUBTREE_MODIFIED,
+      handleDOMSubtreeModified
+    )
     window.removeEventListener(EVENT.RESIZE, handleWindowResize)
 
     // Add/edit list
@@ -719,38 +757,56 @@ $(function () {
   }
 
   function simulateReactTextAreaChangeEvent (element, text) {
-    var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-    nativeInputValueSetter.call(element, text);
-    var ev2 = new Event('input', { bubbles: true});
-    element.dispatchEvent(ev2);
+    var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLTextAreaElement.prototype,
+      'value'
+    ).set
+    nativeInputValueSetter.call(element, text)
+    var ev2 = new Event('input', { bubbles: true })
+    element.dispatchEvent(ev2)
   }
+
   function simulateEnterKey (element) {
     const ke = new KeyboardEvent('keydown', {
-      bubbles: true, cancelable: true, keyCode: 13
-    });
-    element.dispatchEvent(ke);
+      bubbles: true,
+      cancelable: true,
+      keyCode: 13
+    })
+    element.dispatchEvent(ke)
   }
 
   function addTagsOneByOne (tags) {
     const tag = tags.shift()
     debug('addTagsToPost: tags=', tags)
     debug('addTagsToPost: tag=', tag)
+
     if (!tag) {
       return
     }
-    const tagTextArea = document.querySelector(POST_CONTAINER_TAGS_INPUT_SELECTOR)
-    simulateReactTextAreaChangeEvent(tagTextArea, tag)
-    const suggestionButton = document.querySelector(`${CONTAINER_WRAPPER_SELECTOR} button[aria-label="${tag}"]`)
-    debug('addTagsToPost: suggestionButton=', suggestionButton)
-    if (suggestionButton) {
-      suggestionButton.click()
+
+    const legacyTagInput = getLegacyTagInput()
+    const legacyTagInputWrapper = getLegacyTagInput()
+
+    if (legacyTagInput && legacyTagInputWrapper) {
+      legacyTagInput.textContent = tag
+      simulateEnterKey(legacyTagInputWrapper)
     } else {
-      simulateEnterKey(tagTextArea)
+      const tagTextArea = getTagInput()
+      simulateReactTextAreaChangeEvent(tagTextArea, tag)
+      const suggestionButton = document.querySelector(`${CONTAINER_WRAPPER_SELECTOR} button[aria-label="${tag}"]`)
+      debug('addTagsToPost: suggestionButton=', suggestionButton)
+      if (suggestionButton) {
+        suggestionButton.click()
+      } else {
+        simulateEnterKey(tagTextArea)
+      }
     }
+
     setTimeout(() => {
       addTagsOneByOne(tags)
     }, ADDING_TAG_DELAY)
   }
+
   /**
    * Appends the tags to the post.
    * @param  {Number} listIndex
@@ -758,22 +814,29 @@ $(function () {
   function addTagsToPost (listIndex) {
     debug('addTagsToPost: listIndex ', listIndex)
     var obj = store.tags[listIndex]
-    addTagsOneByOne(obj.list.slice())
-  }
+    const tags = obj.list.slice()
+    addTagsOneByOne(tags)
 
+    // HACK, validate the tags input
+    // setTimeout(function () {
+    //   $(POST_CONTAINER_TAGS_INPUT_WRAPPER_SELECTOR_LEGACY).text('')
+    // }, 0)
+  }
 
   /**
    * Adjusts the position of the `tumblrTag` element.
    */
   function updatePosition () {
-    var $settingsIcon = $(SETTINGS_ICON)
+    var $settingsIcon = $(getSettingsIcon())
     if (!$settingsIcon) {
       debug('updatePosition: [noop] no settings icon')
       return
     }
 
     var left = $settingsIcon.offset().left + 200
-    var top = $settingsIcon.offset().top + ($lists.height() * 1.5)
+    var top = $settingsIcon.offset().top + (
+      $lists.height() * 1.5
+    )
     $root.css('top', top.toString() + 'px')
     $root.css('left', left.toString() + 'px')
     $lists.css(getListsCss())
@@ -829,7 +892,11 @@ $(function () {
    * @param {String} listName
    */
   function getUniqueListName (listName) {
-    debug('getUniqueListName: listName %o, editingList %o', listName, editingList)
+    debug(
+      'getUniqueListName: listName %o, editingList %o',
+      listName,
+      editingList
+    )
 
     // The list is being edited, noop
     if (editingList) {
