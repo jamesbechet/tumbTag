@@ -130,26 +130,26 @@ $(function () {
   // var DELETE_LIST_BUTTON_ELEM = '<i class="tumblrTag-deleteListButton
   // icon_close"></i>'
   var DELETE_LIST_BUTTON_ELEM = `
-  <button class='tumblrTag-deleteListButton' aria-label='Dismiss Recommendation'><span class='' tabindex='-1'><svg xmlns='http://www.w3.org/2000/svg' height='14' width='14' role='presentation' style='--icon-color-primary: white'><use href='#managed-icon__close'></use></svg></span></button>
+  <button class='tumblrTag-deleteListButton' aria-label='Dismiss Recommendation'><span class='' tabindex='-1'><svg fill="var(--icon-color-primary, #FFFFFF)" viewBox="0 0 14 14" height='14' width='14'>
+  <path d="M14 2.8L11.2 0 7 4.2 2.8 0 0 2.8 4.2 7 0 11.2 2.8 14 7 9.8l4.2 4.2 2.8-2.8L9.8 7 14 2.8z"></path>
+</svg></span></button>
   `
   var DELETE_LIST_BUTTON_CSS = {
     'float': 'right',
-    'font-size': '1.3em',
-    'padding': '0.1em',
-    'border-radius': '2px',
-    'line-height': '1em'
+    'font-size': '1.4rem'
   }
 
   // The icon to edit a list
   var EDIT_LIST_BUTTON_SELECTOR = '.tumblrTag-editListButton'
-  var EDIT_LIST_BUTTON_ELEM = '<i class="tumblrTag-editListButton icon_edit_pencil"><svg xmlns="http://www.w3.org/2000/svg" height="14" width="16" role="presentation"><use href="#managed-icon__post"></use></svg></i>'
+  var EDIT_LIST_BUTTON_ELEM = `
+<i class="tumblrTag-editListButton"><svg fill="var(--icon-color-primary, #FFF)" viewBox="0 0 16.8 16.8" width='14' height='14'>
+  <path d="M1.2 11.9l-1.2 5 5-1.2 8.2-8.2-3.8-3.8-8.2 8.2zM10 6.3l-6.2 6.2-.6-.6 6.2-6.2c0-.1.6.6.6.6zM13.1 0l-2.5 2.5 3.7 3.7 2.5-2.5L13.1 0z"></path>
+</svg></i>`
   var EDIT_LIST_BUTTON_ELEM_CSS = {
     'float': 'right',
-    'margin-right': '.4em',
-    'font-size': '1.3em',
-    'padding': '0.1em',
-    'border-radius': '2px',
-    'line-height': '1em'
+    'margin-right': '1rem',
+    'font-size': '1.3rem',
+    'line-height': '1rem'
   }
 
   // Other Selectors
@@ -344,9 +344,9 @@ $(function () {
     store.tags.forEach(function (tagObj) {
       var elementStr
       if (listsCount > 1) {
-        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + DELETE_LIST_BUTTON_ELEM + '</li>'
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + DELETE_LIST_BUTTON_ELEM + '</li>'
       } else {
-        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; max-width: 70%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + '</li>'
+        elementStr = '<li class="' + LIST_SELECTOR.slice(1) + '"><span style="display: inline-block; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis">' + tagObj.name + '</span>' + EDIT_LIST_BUTTON_ELEM + '</li>'
       }
       $lists.append(elementStr)
     })
@@ -834,7 +834,19 @@ $(function () {
     }
 
     var left = $settingsIcon.offset().left + 200
-    var top = $settingsIcon.offset().top + (
+    var $tagInputLegacy = $(POST_CONTAINER_TAGS_INPUT_WRAPPER_SELECTOR_LEGACY)
+    var $tagInput = $(POST_CONTAINER_TAGS_INPUT_SELECTOR)
+    var listHeight = $lists.height()
+    var top
+    if ($tagInputLegacy.length) {
+      top = $tagInputLegacy.offset().top - listHeight * 1.5
+    } else if ($tagInput.length) {
+      top = $tagInput.offset().top - listHeight * 1.5
+    } else {
+      top = $settingsIcon.offset().top + (listHeight * 1.5)
+    }
+
+    top =  top + (
       $lists.height() * 1.5
     )
     $root.css('top', top.toString() + 'px')
